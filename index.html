@@ -19,26 +19,21 @@
       radial-gradient(1200px 600px at 80% -10%, rgba(184,137,59,.10), transparent 60%),
       radial-gradient(900px 500px at -10% 110%, rgba(162,59,46,.10), transparent 60%),
       var(--ink);
-    color:var(--paper); line-height:1.6; -webkit-font-smoothing:antialiased;
-    min-height:100vh;
+    color:var(--paper); line-height:1.6; -webkit-font-smoothing:antialiased; min-height:100vh;
   }
   a{color:inherit;text-decoration:none}
   .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
 
-  /* ── Header ───────────────────────────── */
-  header{
-    border-bottom:1px solid var(--line);
+  /* ── Header ── */
+  header{border-bottom:1px solid var(--line);
     background:linear-gradient(180deg, rgba(27,23,20,.9), rgba(27,23,20,.4));
-    position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);
-  }
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
   .hbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:14px}
-  .coin{
-    width:46px;height:46px;border-radius:50%;flex:0 0 auto;
+  .coin{width:46px;height:46px;border-radius:50%;flex:0 0 auto;
     background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 55%, #8a6326 100%);
     display:grid;place-items:center;position:relative;
-    box-shadow:0 0 0 1px rgba(0,0,0,.4), inset 0 0 12px rgba(0,0,0,.45);
-  }
+    box-shadow:0 0 0 1px rgba(0,0,0,.4), inset 0 0 12px rgba(0,0,0,.45)}
   .coin::after{content:"";position:absolute;width:15px;height:15px;background:var(--ink);
     border:1px solid rgba(0,0,0,.5);box-shadow:inset 0 0 4px rgba(0,0,0,.6)}
   .brand h1{font-size:21px;letter-spacing:.5px;font-weight:700;line-height:1.15}
@@ -46,36 +41,51 @@
   .clock{text-align:right;font-family:"SF Mono",ui-monospace,Menlo,monospace}
   .clock .t{font-size:20px;color:var(--gold-bright);letter-spacing:1px}
   .clock .d{font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:2px}
-  .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--green);
-    font-family:Georgia,serif;letter-spacing:1px}
-  .live .dot{width:7px;height:7px;border-radius:50%;background:#5fd081;box-shadow:0 0 8px #5fd081;
-    animation:pulse 1.6s infinite}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--green);font-family:Georgia,serif;letter-spacing:1px}
+  .live .dot{width:7px;height:7px;border-radius:50%;background:#5fd081;box-shadow:0 0 8px #5fd081;animation:pulse 1.6s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
-  /* ── Hero ───────────────────────────── */
-  .hero{padding:34px 0 10px;text-align:center}
+  /* ── Hero ── */
+  .hero{padding:34px 0 6px;text-align:center}
   .hero h2{font-size:30px;font-weight:700;letter-spacing:1px}
   .hero .sub{color:var(--gold-soft);margin-top:8px;font-size:15px}
-  .hero .meta{color:var(--muted);font-size:12.5px;margin-top:12px;max-width:720px;
-    margin-left:auto;margin-right:auto;line-height:1.7}
+  .hero .meta{color:var(--muted);font-size:12.5px;margin-top:12px;max-width:760px;margin-left:auto;margin-right:auto;line-height:1.7}
 
-  /* ── Section titles ───────────────────────────── */
-  .sec{padding:30px 0}
-  .sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  /* ── Section titles ── */
+  .sec{padding:26px 0}
+  .sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:10px;flex-wrap:wrap}
   .sec-h .cn{font-size:19px;font-weight:700;letter-spacing:1px}
   .sec-h .en{font-size:11px;color:var(--gold-soft);letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif}
   .sec-h .count{margin-left:auto;font-size:12px;color:var(--muted);font-family:Georgia,serif}
+  .sec-h .small{flex-basis:100%;font-size:12px;color:var(--muted);margin-top:-4px}
 
-  /* ── Auction cards ───────────────────────────── */
+  /* ── Featured live lots ── */
+  .lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px}
+  .lot{display:flex;flex-direction:column;background:linear-gradient(165deg,var(--card2),var(--card));
+    border:1px solid var(--line);border-radius:13px;overflow:hidden;transition:.22s}
+  .lot:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 14px 30px rgba(0,0,0,.5)}
+  .lot .pic{position:relative;height:158px;background:radial-gradient(circle at 50% 40%,#332a20,#1d1813);overflow:hidden;display:grid;place-items:center}
+  .lot .pic .ph{font-size:30px;font-weight:700;color:rgba(202,164,104,.4);letter-spacing:2px;font-family:"Songti SC",serif}
+  .lot .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .lot .st{position:absolute;top:8px;left:8px;z-index:2;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;font-family:Georgia,serif;letter-spacing:.5px}
+  .st.b-live{background:linear-gradient(90deg,#5fd081,#3f6b46);color:#10221a}
+  .st.b-soon{background:linear-gradient(90deg,var(--gold-bright),var(--gold));color:#241a0a}
+  .lot .body{padding:11px 13px 13px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .lot .dy{font-size:10.5px;font-weight:700;color:var(--gold-bright);background:rgba(184,137,59,.13);border:1px solid var(--line);border-radius:5px;padding:2px 8px;align-self:flex-start}
+  .lot .ti{font-size:13.5px;font-weight:700;color:var(--paper);line-height:1.4}
+  .lot .en{font-size:10.6px;color:var(--muted);line-height:1.4;flex:1;font-family:Georgia,serif}
+  .lot .ft{display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px;font-size:11px;gap:6px;border-top:1px solid var(--line);padding-top:8px}
+  .lot .ft .est{font-weight:700;color:var(--gold-bright);white-space:nowrap}
+  .lot .ft .ho{color:var(--muted);text-align:right;line-height:1.3;font-family:Georgia,serif}
+  .seeall{text-align:right;margin-top:14px}
+  .seeall a{font-size:13px;color:var(--gold-bright);border:1px solid var(--line);border-radius:8px;padding:7px 15px;font-family:Georgia,serif;transition:.18s}
+  .seeall a:hover{background:rgba(184,137,59,.15);border-color:var(--gold)}
+
+  /* ── Auction cards (countdown) ── */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
-  .card{
-    background:linear-gradient(165deg,var(--card2),var(--card));
-    border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;
-    position:relative;overflow:hidden;transition:.25s;display:flex;flex-direction:column;
-  }
+  .card{background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;position:relative;overflow:hidden;transition:.25s;display:flex;flex-direction:column}
   .card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 14px 34px rgba(0,0,0,.5)}
-  .card .ribbon{position:absolute;top:13px;right:-32px;transform:rotate(45deg);
-    font-size:10px;letter-spacing:1.5px;padding:3px 38px;font-family:Georgia,serif;color:#1a1714;font-weight:700}
+  .card .ribbon{position:absolute;top:13px;right:-32px;transform:rotate(45deg);font-size:10px;letter-spacing:1.5px;padding:3px 38px;font-family:Georgia,serif;color:#1a1714;font-weight:700}
   .r-live{background:linear-gradient(90deg,#5fd081,#3f6b46)}
   .r-soon{background:linear-gradient(90deg,var(--gold-bright),var(--gold))}
   .r-consign{background:linear-gradient(90deg,#c98a7a,var(--red))}
@@ -83,61 +93,83 @@
   .card h3{font-size:17px;margin:6px 0 4px;font-weight:700;line-height:1.3;padding-right:48px}
   .card .desc{font-size:13px;color:#cdbfa3;margin:6px 0 12px;flex:1}
   .card .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-  .tag{font-size:11px;background:rgba(184,137,59,.12);border:1px solid var(--line);
-    color:var(--gold-soft);padding:2px 9px;border-radius:20px}
-  .card .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;
-    border-top:1px solid var(--line);padding-top:12px}
+  .tag{font-size:11px;background:rgba(184,137,59,.12);border:1px solid var(--line);color:var(--gold-soft);padding:2px 9px;border-radius:20px}
+  .card .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:12px}
   .cd{font-family:"SF Mono",ui-monospace,Menlo,monospace}
   .cd .lab{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
   .cd .val{font-size:16px;color:var(--gold-bright);letter-spacing:.5px}
   .cd.ended .val{color:var(--muted)}
-  .go{background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1714;
-    font-weight:700;font-size:13px;padding:8px 16px;border-radius:8px;white-space:nowrap;
-    font-family:Georgia,serif;letter-spacing:.5px;transition:.2s;border:1px solid rgba(0,0,0,.2)}
+  .go{background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1714;font-weight:700;font-size:13px;padding:8px 16px;border-radius:8px;white-space:nowrap;font-family:Georgia,serif;letter-spacing:.5px;transition:.2s;border:1px solid rgba(0,0,0,.2)}
   .go:hover{filter:brightness(1.12);box-shadow:0 4px 14px rgba(184,137,59,.4)}
 
-  /* ── Quick search ───────────────────────────── */
-  .search-box{background:linear-gradient(165deg,var(--card2),var(--card));
-    border:1px solid var(--line);border-radius:14px;padding:22px}
+  /* ── Quick search ── */
+  .search-box{background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:22px}
   .plat-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-  .plat{font-size:13px;font-family:Georgia,serif;letter-spacing:.5px;padding:7px 15px;border-radius:8px;
-    border:1px solid var(--line);background:rgba(184,137,59,.06);color:var(--gold-soft);cursor:pointer;transition:.18s}
+  .plat{font-size:13px;font-family:Georgia,serif;letter-spacing:.5px;padding:7px 15px;border-radius:8px;border:1px solid var(--line);background:rgba(184,137,59,.06);color:var(--gold-soft);cursor:pointer;transition:.18s}
   .plat:hover{border-color:var(--gold-soft)}
   .plat.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1714;font-weight:700;border-color:var(--gold)}
   .kw-label{font-size:12px;color:var(--muted);letter-spacing:1px;margin:4px 0 12px;font-family:Georgia,serif;text-transform:uppercase}
   .kw-group{margin-bottom:16px}
   .kw-group .gname{font-size:12.5px;color:var(--gold-soft);margin-bottom:8px;letter-spacing:.5px}
   .chips{display:flex;flex-wrap:wrap;gap:7px}
-  .chip{font-size:13px;padding:6px 13px;border-radius:7px;border:1px solid var(--line);
-    background:rgba(243,234,216,.03);color:var(--paper);cursor:pointer;transition:.18s}
+  .chip{font-size:13px;padding:6px 13px;border-radius:7px;border:1px solid var(--line);background:rgba(243,234,216,.03);color:var(--paper);cursor:pointer;transition:.18s}
   .chip:hover{background:rgba(184,137,59,.18);border-color:var(--gold);transform:translateY(-1px)}
   .chip small{color:var(--muted);font-family:Georgia,serif;margin-left:5px;font-size:10px}
   .free{display:flex;gap:8px;margin-top:6px}
-  .free input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--paper);
-    padding:10px 14px;border-radius:8px;font-family:inherit;font-size:14px;outline:none}
+  .free input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--paper);padding:10px 14px;border-radius:8px;font-family:inherit;font-size:14px;outline:none}
   .free input:focus{border-color:var(--gold-soft)}
-  .free button{background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1714;
-    font-weight:700;border:none;padding:0 22px;border-radius:8px;cursor:pointer;font-family:Georgia,serif;letter-spacing:1px}
+  .free button{background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1714;font-weight:700;border:none;padding:0 22px;border-radius:8px;cursor:pointer;font-family:Georgia,serif;letter-spacing:1px}
 
-  /* ── Platform directory table ───────────────────────────── */
-  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
-  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid rgba(184,137,59,.15)}
-  th{background:rgba(184,137,59,.08);color:var(--gold-soft);font-family:Georgia,serif;
-    letter-spacing:1px;text-transform:uppercase;font-size:11px;font-weight:600}
-  tbody tr:hover{background:rgba(184,137,59,.05)}
-  td .nm{color:var(--gold-bright);font-weight:700}
-  td .flag{font-size:15px;margin-right:4px}
-  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;font-family:Georgia,serif}
-  .p-yes{background:rgba(63,107,70,.25);color:#7fc995;border:1px solid rgba(63,107,70,.4)}
-  .p-top{background:rgba(184,137,59,.2);color:var(--gold-bright);border:1px solid var(--line)}
-  .tlink{color:var(--gold-soft);border-bottom:1px dotted var(--gold-soft);font-family:Georgia,serif;font-size:12px}
+  /* ── Dynasty grid ── */
+  .dyn{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .dyn .d{cursor:pointer;background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:11px;padding:12px 13px;transition:.18s}
+  .dyn .d:hover{transform:translateY(-3px);border-color:var(--gold);background:rgba(184,137,59,.14)}
+  .dyn .d .era{font-weight:700;font-size:14px;color:var(--paper)}
+  .dyn .d .ex{font-size:11px;color:var(--muted);margin-top:3px;font-family:Georgia,serif}
 
-  /* ── Footer ───────────────────────────── */
+  /* ── Tiers ── */
+  .kwtiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:13px}
+  .tier{background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:13px;padding:15px}
+  .tier .t{font-weight:700;font-size:13.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .stars{color:var(--gold-bright);font-size:12px;letter-spacing:1px}
+  .tier .kw{display:flex;flex-wrap:wrap;gap:6px}
+  .tier .kw span{cursor:pointer;font-size:12.5px;background:rgba(243,234,216,.03);border:1px solid var(--line);color:var(--paper);border-radius:7px;padding:4px 10px;transition:.18s}
+  .tier .kw span:hover{background:rgba(184,137,59,.18);border-color:var(--gold)}
+
+  /* ── Platform cards ── */
+  .pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:13px}
+  .pcard{background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:13px;padding:15px 16px;display:flex;flex-direction:column;gap:8px;transition:.18s}
+  .pcard:hover{transform:translateY(-2px);border-color:var(--gold)}
+  .pcard .name{font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:8px}
+  .pcard .ptag{font-size:11px;font-weight:700;color:var(--gold-bright);background:rgba(184,137,59,.13);border:1px solid var(--line);border-radius:6px;padding:2px 8px;align-self:flex-start;font-family:Georgia,serif}
+  .pcard .pdesc{font-size:12.6px;color:#cdbfa3;flex:1}
+  .pcard .plinks{display:flex;flex-wrap:wrap;gap:7px;margin-top:3px}
+  .pcard .plinks a{font-size:12px;font-weight:600;color:var(--gold-bright);border:1px solid var(--line);border-radius:8px;padding:5px 11px;transition:.18s;background:rgba(243,234,216,.03);font-family:Georgia,serif}
+  .pcard .plinks a:hover{background:rgba(184,137,59,.18);border-color:var(--gold)}
+
+  /* ── Consignment directory ── */
+  .houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(335px,1fr));gap:14px}
+  .conhouse{background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:10px}
+  .conhouse .hd{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .conhouse .hd .nm{font-weight:700;font-size:15.5px}
+  .conhouse .hd .rk{font-size:11px;font-weight:700;color:#1a1714;border-radius:6px;padding:2px 8px;font-family:Georgia,serif}
+  .rk.red{background:linear-gradient(90deg,#c98a7a,var(--red));color:#fff}
+  .rk.g{background:linear-gradient(90deg,#5fd081,var(--green));color:#10221a}
+  .rk.o{background:linear-gradient(90deg,var(--gold-bright),var(--gold))}
+  .conhouse .rows{display:flex;flex-direction:column;gap:5px}
+  .conhouse .r{display:flex;gap:9px;font-size:12.4px;line-height:1.45}
+  .conhouse .r .k{flex:none;width:72px;color:var(--gold-soft);font-weight:700}
+  .conhouse .r .v{flex:1;color:#cdbfa3}
+  .yes{color:#7fc995;font-weight:700}
+  .no{color:#d98a7a;font-weight:700}
+  .conhouse .act a{display:inline-block;font-size:12.5px;font-weight:700;color:#1a1714;background:linear-gradient(180deg,var(--gold-bright),var(--gold));border-radius:8px;padding:7px 14px;font-family:Georgia,serif;transition:.18s}
+  .conhouse .act a:hover{filter:brightness(1.1)}
+
+  /* ── Footer ── */
   footer{border-top:1px solid var(--line);margin-top:40px;padding:26px 0 40px;color:var(--muted);font-size:12px;line-height:1.8}
   footer b{color:var(--gold-soft)}
-  .disc{background:rgba(162,59,46,.08);border:1px solid rgba(162,59,46,.25);border-radius:10px;
-    padding:14px 16px;margin-bottom:18px;font-size:12.5px;color:#d8c4a4}
+  footer a{color:var(--gold-soft);border-bottom:1px dotted var(--gold-soft)}
+  .disc{background:rgba(162,59,46,.08);border:1px solid rgba(162,59,46,.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:12.5px;color:#d8c4a4}
 
   @media(max-width:640px){
     .hero h2{font-size:23px}.brand h1{font-size:17px}.clock .t{font-size:16px}
@@ -168,27 +200,37 @@
 
   <section class="hero">
     <h2>正在进行 · 即将截止的中国古钱专场</h2>
-    <div class="sub">先秦布刀 · 半两五铢 · 唐宋母钱雕母 · 辽金西夏 · 咸丰大钱 · 宫钱花钱 · 顶级机制币</div>
+    <div class="sub">先秦刀布 · 半两五铢 · 唐宋辽金元明清 · 母钱雕母 · 咸丰大钱 · 宫钱花钱 · 顶级机制币</div>
     <div class="meta">
-      聚合全球主要拍卖平台正在拍卖中的中国古钱与机制币。每个关键词一键直达对应平台的<b>已筛选实时列表</b>，
-      无需逐页翻目录。倒计时实时刷新，红色为寄拍征集截止。
+      聚合全球主要拍卖平台正在拍卖中的中国古钱与机制币。下方<b>精选拍品</b>为真实在拍快照，每个按钮 / 关键词都会在新标签页打开该平台的<b>当前实时筛选结果</b>，价格与剩余时间以平台页面为准。
     </div>
   </section>
 
-  <!-- ── 正在拍卖 ── -->
+  <!-- ── 精选在拍拍品 ── -->
+  <section class="sec" id="lots-sec">
+    <div class="sec-h">
+      <span class="cn">🪙 精选 · 正在 / 即将拍的古钱拍品</span>
+      <span class="en">Featured Live Lots</span>
+      <span class="small">真实在拍快照（更新 2026-06-29）· 点击直达该拍品页 · 估价 / 竞价以平台为准</span>
+    </div>
+    <div class="lots" id="lots"></div>
+    <div class="seeall"><a href="https://www.numisbids.com/n.php?p=searchall&searchall=Chinese+cash" target="_blank" rel="noopener">查看全部在拍古钱 →</a></div>
+  </section>
+
+  <!-- ── 现役专场（倒计时）── -->
   <section class="sec" id="live">
     <div class="sec-h">
-      <span class="cn">现役拍卖面板</span>
+      <span class="cn">⏱ 现役拍卖面板</span>
       <span class="en">Active &amp; Upcoming Sales</span>
       <span class="count" id="liveCount"></span>
     </div>
     <div class="grid" id="auctionGrid"></div>
   </section>
 
-  <!-- ── 一键直达搜索 ── -->
+  <!-- ── 一键直达检索 ── -->
   <section class="sec" id="search">
     <div class="sec-h">
-      <span class="cn">一键直达 · 关键词检索</span>
+      <span class="cn">🔍 一键直达 · 关键词检索</span>
       <span class="en">One-Click Search</span>
     </div>
     <div class="search-box">
@@ -206,41 +248,71 @@
     </div>
   </section>
 
-  <!-- ── 平台目录 / 寄拍 ── -->
-  <section class="sec" id="houses">
+  <!-- ── 按朝代检索 ── -->
+  <section class="sec" id="dynasty">
     <div class="sec-h">
-      <span class="cn">全球平台目录 · 海外寄拍参考</span>
-      <span class="en">Auction House Directory</span>
+      <span class="cn">🏯 按朝代逐代实时检索</span>
+      <span class="en">Search by Dynasty</span>
+      <span class="small">点击任一朝代，直接在所选平台检索该时期的中国古钱拍品</span>
     </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead>
-          <tr><th>拍卖行 / 平台</th><th>地区</th><th>定位</th><th>海外寄拍</th><th>适合</th><th>直达</th></tr>
-        </thead>
-        <tbody id="houseTable"></tbody>
-      </table>
+    <div class="dyn" id="dyn"></div>
+  </section>
+
+  <!-- ── 按收藏等级 ── -->
+  <section class="sec" id="tiers-sec">
+    <div class="sec-h">
+      <span class="cn">⭐ 按收藏等级快搜</span>
+      <span class="en">Search by Collecting Tier</span>
+      <span class="small">点击即查实时拍品（古钱方向）</span>
     </div>
+    <div class="kwtiers" id="tiers"></div>
+  </section>
+
+  <!-- ── 平台 / 拍卖行 ── -->
+  <section class="sec" id="platforms">
+    <div class="sec-h">
+      <span class="cn">🌐 聚合平台 &amp; 古钱重点拍卖行</span>
+      <span class="en">Platforms &amp; Houses</span>
+    </div>
+    <div class="pcards" id="pcards"></div>
+  </section>
+
+  <!-- ── 寄拍名单 ── -->
+  <section class="sec" id="consign-sec">
+    <div class="sec-h">
+      <span class="cn">📮 全球中国古钱寄拍行名单</span>
+      <span class="en">Consignment Directory</span>
+      <span class="small">按古钱适合度排序 · 邮箱 / 佣金以官方寄拍页为准（会变动，寄拍前请再确认）</span>
+    </div>
+    <div class="houses" id="consign"></div>
   </section>
 
   <footer>
     <div class="disc">
-      <b>关于"实时"的说明：</b>各拍卖行库存逐秒变化、且多有反爬/CORS 限制，纯前端无法直接抓取私有数据。
-      本站采用"<b>策展面板 + 一键直达已筛选结果</b>"方案：卡片与倒计时为人工维护的当前现役专场，关键词按钮则实时跳转到各平台的官方筛选页面（数据以平台为准）。
+      <b>关于"实时"的说明：</b>各拍卖行库存逐秒变化、且多有反爬 / CORS 限制，纯前端无法直接抓取私有数据。
+      本站采用"<b>策展面板 + 一键直达已筛选结果</b>"方案：精选拍品与专场卡片为人工维护的当前现役数据（含真实 lot 快照），关键词 / 朝代 / 等级按钮则实时跳转到各平台官方筛选页面（数据以平台为准）。
     </div>
     <div>
-      数据时点：<b id="asof"></b> · 维护方式：编辑 <b>index.html</b> 顶部 <b>AUCTIONS</b> 数组即可增删专场。<br>
-      聚合平台：NumisBids · Biddr · Heritage · Stephen Album (SARC) · GreatCollections · Spink &nbsp;|&nbsp; © 2026 China Coin Auction Live
+      数据时点：<b id="asof"></b> · 维护方式：编辑 <b>index.html</b> 顶部数据数组即可增删。<br>
+      主要来源：
+      <a href="https://www.numisbids.com/" target="_blank" rel="noopener">NumisBids</a> ·
+      <a href="https://www.biddr.com/" target="_blank" rel="noopener">Biddr</a> ·
+      <a href="https://www.stevealbum.com/" target="_blank" rel="noopener">Stephen Album</a> ·
+      <a href="https://coins.ha.com/" target="_blank" rel="noopener">Heritage</a> ·
+      <a href="https://stacksbowers.com/" target="_blank" rel="noopener">Stack's Bowers</a> ·
+      <a href="https://www.spink.com/" target="_blank" rel="noopener">Spink</a> ·
+      <a href="https://www.kuenker.de/en/" target="_blank" rel="noopener">Künker</a> ·
+      <a href="https://www.taiseicoins.com/" target="_blank" rel="noopener">Taisei</a>
+      &nbsp;|&nbsp; © 2026 China Coin Auction Live
     </div>
   </footer>
 </div>
 
 <script>
-/* ════════════════════════════════════════════════
-   数据时点（编辑这里）
-   ════════════════════════════════════════════════ */
+/* ════════════════ 数据时点 ════════════════ */
 const AS_OF = "2026-06-29";
 
-/* ─── 平台搜索链接模板（{q} 会替换为编码后的关键词）─── */
+/* ─── 平台搜索链接模板（{q} → 编码关键词）─── */
 const PLATFORMS = [
   { id:"numisbids", name:"NumisBids", tpl:"https://www.numisbids.com/n.php?p=searchall&searchall={q}" },
   { id:"biddr",     name:"Biddr",     tpl:"https://www.biddr.com/search?q={q}" },
@@ -250,15 +322,21 @@ const PLATFORMS = [
   { id:"google",    name:"Google 全网", tpl:"https://www.google.com/search?q={q}+chinese+coin+auction" },
 ];
 let activePlat = "numisbids";
+const enc = s => encodeURIComponent(s);
+function buildURL(term){ return PLATFORMS.find(p=>p.id===activePlat).tpl.replace("{q}", enc(term)); }
+function openSearch(term){ window.open(buildURL(term), "_blank", "noopener"); }
+const NB = q => "https://www.numisbids.com/n.php?p=searchall&searchall=" + enc(q);
+const BD = q => "https://www.biddr.com/search?q=" + enc(q);
+function freeSearch(){ const v=document.getElementById("freeInput").value.trim(); if(v) openSearch(v); }
+document.addEventListener("keydown",e=>{ if(e.key==="Enter" && document.activeElement.id==="freeInput") freeSearch(); });
 
-/* ─── 关键词组（中文显示 + 实际检索英文 term）─── */
+/* ─── 关键词组 ─── */
 const KW_GROUPS = [
   { name:"先秦 · 战国（顶级）", kws:[
     ["战国刀币","Chinese knife money"],["战国布币","Chinese spade money"],
     ["蚁鼻钱","ant nose money"],["圜钱","round coin Warring States"] ] },
   { name:"秦汉 · 隋唐", kws:[
-    ["半两","Ban Liang"],["五铢","Wu Zhu"],["王莽","Wang Mang"],
-    ["开元通宝","Kai Yuan Tong Bao"] ] },
+    ["半两","Ban Liang"],["五铢","Wu Zhu"],["王莽","Wang Mang"],["开元通宝","Kai Yuan Tong Bao"] ] },
   { name:"宋 · 辽 · 金 · 西夏", kws:[
     ["宋代母钱","Song mother coin"],["宋代雕母","Song pattern coin"],
     ["辽钱","Liao dynasty coin"],["金代钱","Jin dynasty coin"],["西夏钱","Western Xia coin"] ] },
@@ -273,94 +351,124 @@ const KW_GROUPS = [
     ["龙洋样币","China dragon dollar pattern"],["NGC 评级","China NGC"],["PCGS 评级","China PCGS"] ] },
 ];
 
-/* ─── 现役拍卖专场（编辑这里增删）
-       status: live / soon / consign
-       end: ISO 截止时间（倒计时目标）—— consign 为征集截止 ─── */
+/* ─── 现役专场（带倒计时；status: live/soon/consign）─── */
 const AUCTIONS = [
-  {
-    house:"Stephen Album Rare Coins", status:"live",
+  { house:"Stephen Album Rare Coins", status:"live",
     title:"Accumulations & Collections — Auction 5",
     desc:"目前国际市场上唯一明确包含大量中国古钱的现役专场。China – Mixed Lots 已上线（如 Lot 502：约 35 枚古钱 + 机制币，起拍 $100）。",
-    tags:["中国古钱","机制币","大组货","在线竞拍"],
-    end:"2026-07-09T18:00:00-07:00",
-    link:"https://www.sarc.auction/"
-  },
-  {
-    house:"Spink", status:"soon",
-    title:"中国古钱 · 机制币 · 香港钱币专场",
-    desc:"英国 350 年老牌拍卖行，7 月初开拍。涵盖中国古钱、机制币、香港钱币与东亚收藏。",
-    tags:["中国古钱","机制币","香港钱币"],
-    end:"2026-07-08T10:00:00+01:00",
-    link:"https://www.spink.com/department/CC"
-  },
-  {
-    house:"Heritage Auctions", status:"live",
-    title:"World & Ancient Coins — Showcase Auction",
-    desc:"全球最大钱币拍卖行。香港 Signature 已结束，美国 Showcase 世界钱币专场持续推出，偶有中国精品。",
-    tags:["世界钱币","中国精品","Heritage Live"],
-    end:"2026-07-13T20:00:00-05:00",
-    link:"https://coins.ha.com/c/search-results.zx?Ntt=china+cash"
-  },
-  {
-    house:"GreatCollections", status:"live",
+    tags:["中国古钱","机制币","大组货","在线竞拍"], end:"2026-07-09T18:00:00-07:00", link:"https://www.sarc.auction/" },
+  { house:"Spink", status:"soon",
+    title:"China / Hong Kong Coins（CSS 系列）",
+    desc:"英国 350 年老牌拍卖行，7 月初开拍。CSS 系列中国古钱专场，香港 + 伦敦双客群，图录已可在 NumisBids 同步浏览。",
+    tags:["中国古钱","机制币","香港钱币"], end:"2026-07-08T10:00:00+01:00", link:"https://www.spink.com/department/CC" },
+  { house:"Heritage Auctions", status:"live",
+    title:"World & Ancient Coins — Showcase",
+    desc:"全球最大钱币拍卖行。香港 Signature 已结束，美国 Showcase 世界钱币专场持续推出，含中国古钱与精品。",
+    tags:["世界钱币","中国精品","Heritage Live"], end:"2026-07-13T20:00:00-05:00", link:"https://coins.ha.com/world-coins-index/china.s?id=5" },
+  { house:"GreatCollections", status:"live",
     title:"PCGS / NGC 认证币 · 每日拍卖",
     desc:"每日结拍的在线平台，大量 PCGS/NGC 评级币，可直接筛选 China 分类。",
-    tags:["评级币","每日结拍","PCGS/NGC"],
-    end:"2026-07-06T20:00:00-08:00",
-    link:"https://www.greatcollections.com/search.php?q=China&mode=product"
-  },
-  {
-    house:"Biddr (欧洲多家)", status:"live",
+    tags:["评级币","每日结拍","PCGS/NGC"], end:"2026-07-06T20:00:00-08:00", link:"https://www.greatcollections.com/search.php?q=China&mode=product" },
+  { house:"Biddr (欧洲多家)", status:"live",
     title:"Chinese Coins — 实时在线竞拍",
-    desc:"世界最大实时竞拍平台之一，几十家欧洲拍卖行同时上线，可按 Chinese Coins 分类筛选，每日更新。",
-    tags:["欧洲拍卖","实时竞拍","宋辽金"],
-    end:"2026-07-11T19:00:00+02:00",
-    link:"https://www.biddr.com/search?q=chinese+cash"
-  },
-  {
-    house:"Stephen Album Rare Coins", status:"consign",
-    title:"Auction 56（9 月） · 寄拍征集中",
+    desc:"世界最大实时竞拍平台之一，几十家欧洲拍卖行同时上线，宋辽金钱 / 咸丰大钱 / 花钱 / 日本旧藏中国钱，每日更新。",
+    tags:["欧洲拍卖","实时竞拍","宋辽金"], end:"2026-07-11T19:00:00+02:00", link:"https://www.biddr.com/auctions/upcoming" },
+  { house:"Stephen Album Rare Coins", status:"consign",
+    title:"Auction 56（9 月 · 旗舰场）· 寄拍征集中",
     desc:"古钱专场，9 月举行，现已开始征集拍品。海外寄拍寄件截止 7 月 1 日 —— 母钱 / 雕母 / 咸丰大钱 / 辽金元收藏优先联系。",
-    tags:["寄拍征集","古钱专场","母钱雕母"],
-    end:"2026-07-01T23:59:00-07:00",
-    link:"mailto:info@stevealbum.com?subject=China%20Cash%20Consignment%20Auction%2056"
-  },
+    tags:["寄拍征集","古钱专场","母钱雕母"], end:"2026-07-01T23:59:00-07:00", link:"mailto:info@stevealbum.com?subject=China%20Cash%20Consignment%20Auction%2056" },
 ];
 
-/* ─── 平台目录（寄拍参考）─── */
-const HOUSES = [
-  { nm:"Heritage Auctions", flag:"🇺🇸", role:"全球最大 · 成交纪录最高", consign:"top", fit:"高端机制币 / 样币 / 珍稀古钱", url:"https://coins.ha.com" },
-  { nm:"Stack's Bowers", flag:"🇺🇸", role:"中国机制币国际市场最成熟", consign:"top", fit:"高端古钱 / 机制币 / 大型收藏", url:"https://www.stacksbowers.com" },
-  { nm:"Stephen Album (SARC)", flag:"🇺🇸", role:"古钱最专业 · 东方钱币权威", consign:"yes", fit:"宋辽金元 / 咸丰大钱 / 母钱雕母", url:"https://www.stevealbum.com" },
-  { nm:"Spink", flag:"🇬🇧", role:"350 年老牌 · 中国钱币纸币", consign:"yes", fit:"中国古钱 / 机制币 / 纸币", url:"https://www.spink.com" },
-  { nm:"Numismatica Ars Classica", flag:"🇨🇭", role:"顶级古钱拍卖行 · 精品高价", consign:"yes", fit:"博物馆级精品", url:"https://www.arsclassicacoins.com" },
-  { nm:"Künker", flag:"🇩🇪", role:"欧洲最大古钱拍卖行之一", consign:"yes", fit:"中国古钱（近年增多）", url:"https://www.kuenker.de" },
-  { nm:"Osaka Auction", flag:"🇯🇵", role:"日本藏中国钱历史悠久", consign:"yes", fit:"唐宋钱 / 明钱 / 渡来钱", url:"https://www.the-saleroom.com" },
-  { nm:"Taisei Coins", flag:"🇯🇵", role:"日本最大国际钱币公司之一", consign:"yes", fit:"中国古钱 / 东亚收藏", url:"https://www.taisei-coins.com" },
-  { nm:"CNG", flag:"🇺🇸", role:"古典 + 丝路 / 东亚古钱", consign:"yes", fit:"丝绸之路 / 东亚古钱", url:"https://www.cngcoins.com" },
-  { nm:"NumisBids", flag:"🌐", role:"全球拍卖目录聚合平台", consign:"yes", fit:"一次浏览数百家拍卖行", url:"https://www.numisbids.com" },
-  { nm:"Biddr", flag:"🌐", role:"欧洲最大实时在线竞拍", consign:"yes", fit:"欧洲拍卖行实时竞拍", url:"https://www.biddr.com" },
+/* ─── 精选真实在拍拍品（快照 2026-06-29）─── */
+const M = "https://media.numisbids.com/sales/hosted/";
+const L = "https://www.numisbids.com/sale/";
+const FEATURED = [
+  {dy:'清 · 咸丰大钱',ti:'咸丰重宝 当五十 · 宝昌局',en:'Qing, copper 50 cash, Xianfeng Zhong Bao, Bao Chang Mint · GBCA 80',est:'估 1,600 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02009.jpg',url:L+'10840/lot/2009'},
+  {dy:'五代 · 后晋',ti:'天福元宝',en:"China, Later Jin, 1 Cash 'Tian Fu Yuan Bao', AD 938 · GBCA 80 · 稀少",est:'估 1,000 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02003.jpg',url:L+'10840/lot/2003'},
+  {dy:'元 · 武宗',ti:'大元通宝 当十 · 八思巴文',en:"Yuan, Wu Zong, bronze 10 Cash 'Da Yuan Tong Bao', Phags-pa script",est:'估 80 GBP',ho:"St. James's 125",date:'7/15 截拍',stt:'即将',cls:'b-soon',img:M+'stjames/125/thumb00301.jpg',url:L+'10865/lot/301'},
+  {dy:'新莽 · 王莽',ti:'货布',en:"Xin dynasty, Wang Mang (7-23 AD), bronze 'Huo Bu', value 25 cash",est:'估 30 GBP',ho:"St. James's 125",date:'7/15 截拍',stt:'即将',cls:'b-soon',img:M+'stjames/125/thumb00298.jpg',url:L+'10865/lot/298'},
+  {dy:'中国历代',ti:'古钱 49 枚 · 西汉至清',en:'CHINA: LOT of 49 cash coins, Western Han through Qing',est:'起拍 80 USD',ho:'Stephen Album AC5',date:'正在竞拍',stt:'LIVE',cls:'b-live',img:M+'album/ac5/thumb00515.jpg',url:L+'10826/lot/515'},
+  {dy:'北宋 · 徽宗',ti:'崇宁通宝 折十',en:"Northern Song, bronze 10 cash 'Chong Ning Tong Bao', 1102-06 · GBCA 85",est:'估 100 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02004.jpg',url:L+'10840/lot/2004'},
+  {dy:'清 · 咸丰',ti:'咸丰通宝 当五十 · 宝泉局',en:'Qing, Xian Feng, bronze 50 cash, Board of Revenue, east branch',est:'估 100 GBP',ho:"St. James's 125",date:'7/15 截拍',stt:'即将',cls:'b-soon',img:M+'stjames/125/thumb00303.jpg',url:L+'10865/lot/303'},
+  {dy:'明 · 朱元璋',ti:'大中通宝 当十 · 背十',en:"Ming, Zhu Yuanzhang, bronze 10 cash 'Da Zhong Tong Bao', rev. 'Shi'",est:'估 50 GBP',ho:"St. James's 125",date:'7/15 截拍',stt:'即将',cls:'b-soon',img:M+'stjames/125/thumb00302.jpg',url:L+'10865/lot/302'},
+  {dy:'新莽',ti:'货布 · GBCA 82',en:"Xin Dynasty, bronze cash 'Huo Buo', 14-23 A.D.",est:'估 700 HKD',ho:'Spink CSS126A',date:'7/2 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126a/thumb00158.jpg',url:L+'10838/lot/158'},
+  {dy:'明 · 隆武',ti:'隆武通宝 折二',en:"Ming, brass 2 cash 'Long Wu Tong Bao' · GBCA 78",est:'估 200 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02005.jpg',url:L+'10840/lot/2005'},
+  {dy:'清 · 雍正',ti:'雍正通宝 · 宝云局（2枚）',en:'Qing, cash (2), Yong Zheng Tong Bao, Bao Yun Mint · GBCA 82/80',est:'估 200 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02007.jpg',url:L+'10840/lot/2007'},
+  {dy:'中国古钱',ti:'52 枚 · 元丰 / 洪武 等',en:"China, group of 52 cash incl. Yuan Feng, Hong Wu Tong Bao...",est:'估 500 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02010.jpg',url:L+'10840/lot/2010'},
+  {dy:'清 · 康熙',ti:'康熙通宝 全套',en:"Qing, brass 1 cash full set 'Kang Xi Tong Bao', 1763-1911",est:'估 4,000 HKD',ho:'Spink CSS126A',date:'7/2 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126a/thumb00159.jpg',url:L+'10838/lot/159'},
+  {dy:'清 · 咸丰',ti:'咸丰重宝 当十 · 宝昌局',en:"Qing, brass 10 cash 'Xian Feng Zhong Bao', 1853-61, Bao Chang",est:'估 400 HKD',ho:'Spink CSS126C',date:'7/4 截拍',stt:'即将',cls:'b-soon',img:M+'spink/css126c/thumb02008.jpg',url:L+'10840/lot/2008'}
 ];
 
-/* ════════════════════════════════════════════════
-   渲染
-   ════════════════════════════════════════════════ */
-const enc = s => encodeURIComponent(s);
-function buildURL(term){ return PLATFORMS.find(p=>p.id===activePlat).tpl.replace("{q}", enc(term)); }
-function openSearch(term){ window.open(buildURL(term), "_blank", "noopener"); }
-function freeSearch(){ const v=document.getElementById("freeInput").value.trim(); if(v) openSearch(v); }
-document.addEventListener("keydown",e=>{ if(e.key==="Enter" && document.activeElement.id==="freeInput") freeSearch(); });
+/* ─── 朝代 ─── */
+const DYNASTIES = [
+  {era:'先秦 · 刀币',ex:'齐刀 · 明刀 · 尖首刀',q:'Chinese knife money'},
+  {era:'先秦 · 布币',ex:'空首布 · 平首布 · 三孔布',q:'Chinese spade money'},
+  {era:'先秦 · 其他',ex:'圜钱 · 蚁鼻钱 · 鬼脸钱',q:'ant nose money'},
+  {era:'秦 / 汉',ex:'半两 · 五铢',q:'ban liang wu zhu'},
+  {era:'新莽',ex:'货布 · 大泉五十 · 一刀平五千',q:'Wang Mang'},
+  {era:'唐',ex:'开元通宝 · 乾元重宝',q:'Kai Yuan Tong Bao'},
+  {era:'五代十国',ex:'唐国通宝 · 周元通宝',q:'Tang Guo Tong Bao'},
+  {era:'北宋 / 南宋',ex:'崇宁 · 大观 · 淳化',q:'Song dynasty cash'},
+  {era:'辽',ex:'契丹小钱 · 天朝万顺',q:'Liao dynasty cash'},
+  {era:'西夏',ex:'西夏文钱 · 大安宝钱',q:'Western Xia cash'},
+  {era:'金',ex:'泰和重宝 · 大定通宝',q:'Jin dynasty cash'},
+  {era:'元',ex:'至大通宝 · 大元国宝',q:'Yuan dynasty cash'},
+  {era:'明',ex:'洪武 · 永乐 · 大中通宝',q:'Ming dynasty cash'},
+  {era:'清',ex:'咸丰大钱 · 雕母 · 宝泉局',q:'Qing dynasty cash'},
+  {era:'母钱 / 雕母',ex:'mother coin · pattern',q:'Chinese mother coin'},
+  {era:'花钱 / 钱范',ex:'charm · coin mould',q:'Chinese charm'}
+];
 
-/* 平台按钮 */
+/* ─── 收藏等级 ─── */
+const TIERS = [
+  {t:'博物馆级（>$10,000）',s:'★',kw:['三孔布 three-hole spade','齐六字刀','大齐通宝','国宝金匮直万','西夏文钱']},
+  {t:'母钱 / 雕母',s:'★★',kw:['mother coin','母钱','雕母 pattern','样钱']},
+  {t:'咸丰大钱',s:'★★★',kw:['Xianfeng','咸丰重宝','咸丰元宝','宝泉局','宝源局','宝福局']},
+  {t:'宋代精品',s:'★★★★',kw:['Song cash','宋钱','宋代母钱','大观通宝','崇宁通宝']},
+  {t:'战国刀布币',s:'★★★★★',kw:['knife money','刀币','布币 spade','燕明刀','齐刀']},
+  {t:'高古 / 通用',s:'★★★★★★',kw:['半两 Banliang','五铢 Wuzhu','Wang Mang','Kai Yuan','开元通宝','辽 Liao','西夏 Xixia','金 Jin','花钱 charm','钱范 mould']}
+];
+
+/* ─── 平台 / 拍卖行卡片 ─── */
+const PCARDS = [
+  {name:'NumisBids',flag:'🌐',tag:'最推荐 · 聚合数百家',desc:'全球钱币拍卖图录聚合，一处检索 Spink、Künker、欧洲各行的中国古钱。',
+   links:[{t:'China cash',u:NB('China cash')},{t:'母钱 mother',u:NB('mother coin')},{t:'咸丰 Xianfeng',u:NB('Xianfeng')},{t:'首页',u:'https://www.numisbids.com/'}]},
+  {name:'Biddr',flag:'🇪🇺',tag:'实时竞拍 · 每日新场',desc:'欧洲最大实时竞价平台之一，几十家拍卖行同时在线，中国古钱持续增加。',
+   links:[{t:'搜古钱',u:BD('Chinese cash')},{t:'即将开拍',u:'https://www.biddr.com/auctions/upcoming'},{t:'Album 专页',u:'https://www.biddr.com/stevealbum'}]},
+  {name:'Stephen Album',flag:'🇺🇸',tag:'古钱最专业',desc:'中国古钱藏家首选：先秦至清、宋辽金元、咸丰大钱、母钱、雕母专长。一年三大场 + 网拍。',
+   links:[{t:'当前拍卖',u:'https://www.sarc.auction/'},{t:'官网',u:'https://www.stevealbum.com/'},{t:'NumisBids',u:NB('Stephen Album China')}]},
+  {name:"Stack's Bowers",flag:'🇺🇸',tag:'亚洲买家最多',desc:'香港 + 美国双场，高端中国古钱，远东收藏成交纪录多。',
+   links:[{t:'官网',u:'https://stacksbowers.com/'},{t:'NumisBids',u:NB("Stack's Bowers China cash")}]},
+  {name:'Heritage (HA)',flag:'🇺🇸',tag:'成交能力最强',desc:'全球最大钱币行，世界钱币专场常含珍稀中国古钱。',
+   links:[{t:'中国币',u:'https://coins.ha.com/world-coins-index/china.s?id=5'},{t:'拍卖日历',u:'https://www.ha.com/heritage-auctions-schedule.s?category=world-and-ancient-coins'}]},
+  {name:'Spink',flag:'🇬🇧',tag:'350 年老行',desc:'伦敦 / 香港，CSS 系列中国古钱专场，东亚收藏深厚。',
+   links:[{t:'实时拍卖',u:'https://www.spink.com/auctions/live'},{t:'NumisBids',u:NB('Spink China cash')}]},
+  {name:'Künker',flag:'🇩🇪',tag:'欧洲最大之一',desc:'德国老牌大行，近年中国古钱越来越多，与 NumisBids 同步图录。',
+   links:[{t:'官网',u:'https://www.kuenker.de/en/'},{t:'NumisBids',u:NB('Kuenker China')}]},
+  {name:'Taisei / Osaka',flag:'🇯🇵',tag:'唐宋钱丰富',desc:'日本藏中国古钱历史悠久，唐宋钱、明钱、渡来钱多，精品成交高。',
+   links:[{t:'Taisei',u:NB('Taisei China cash')},{t:'Osaka',u:NB('Osaka China cash')}]}
+];
+
+/* ─── 寄拍名单 ─── */
+const CONSIGN = [
+  {nm:'Stephen Album Rare Coins',flag:'🇺🇸',rk:'古钱首选',rkc:'g',email:'info@stevealbum.com · +1 707-539-2120',dept:'古钱 / 东方钱币专家团队（公司核心方向即中国古钱）',comm:'佣金优惠，可议；提供全额保险寄件标签（具体比例需邮件确认）',intl:'yes',slab:'yes',fit:'★★★★★ 古钱最专业，宋辽金元、咸丰、母钱雕母最对口',url:'https://db.stevealbum.com/php/consign.php'},
+  {nm:"Stack's Bowers Galleries",flag:'🇺🇸/🇭🇰',rk:'高价能力强',rkc:'red',email:'香港 +852 2117 1191 · 见官网寄拍页',dept:'远东 / 中国钱币部（香港 + 加州）',comm:'随规模与价值而定；不另收摄影/图录/保险费；结款拍后约 45 天，可申请预付款',intl:'yes',slab:'yes',fit:'★★★★★ 高端古钱、整批大藏，亚洲买家群最成熟',url:'https://stacksbowers.com/sell-consign/hongkong/en/'},
+  {nm:'Heritage Auctions (HA)',flag:'🇺🇸',rk:'成交纪录最高',rkc:'red',email:'Consignor Hotline +1 800-835-6000 · 见官网寄拍页',dept:'世界与古代钱币部（World & Ancient Coins）',comm:'Signature 约 10%、每周网拍约 15%，大宗可议；含摄影/编目/保险',intl:'yes',slab:'yes',fit:'★★★★☆ 珍稀古钱可冲全球最高价，普品建议走他家',url:'https://coins.ha.com/consign-your-collectibles.s'},
+  {nm:'Spink',flag:'🇬🇧/🇭🇰',rk:'350 年老行',rkc:'o',email:'伦敦 +44 20 7563 4000 · Spink China(香港) +852 3952 3000',dept:'钱币部（Coins）· 中国古钱专场 CSS 系列',comm:'卖方佣金按成交价计 + 手续费（+ 适用 VAT），可议；估价/编目不另收费',intl:'yes',slab:'yes',fit:'★★★★☆ 中国古钱、东亚收藏，伦敦+香港双客群',url:'https://www.spink.com/auctions/selling'},
+  {nm:'Fritz Rudolf Künker',flag:'🇩🇪',rk:'欧洲最大之一',rkc:'o',email:'service@kuenker.de · +49 541 96202 0',dept:'通用钱币部（中国古钱近年增多）',comm:'按落槌价计佣，含估价/摄影/图录/运输保险；流拍不收佣金',intl:'yes',slab:'yes',fit:'★★★☆☆ 欧洲买家群，适合中高端古钱进欧洲市场',url:'https://www.kuenker.de/sell/'},
+  {nm:'Taisei Coins',flag:'🇯🇵',rk:'日本最大之一',rkc:'o',email:'auction@taiseicoins.com · +81 3-6735-2104',dept:'国际钱币部（中国古钱、渡来钱）',comm:'按成交价计佣，具体比例邮件确认',intl:'yes',slab:'yes',fit:'★★★☆☆ 唐宋明钱、日本旧藏中国古钱的优质渠道',url:'https://www.taiseicoins.com/'},
+  {nm:'Osaka Auction（大阪）',flag:'🇯🇵',rk:'唐宋钱',rkc:'o',email:'见 NumisBids 公司页 / 官网寄拍',dept:'东亚古钱',comm:'按成交价计佣，邮件确认',intl:'yes',slab:'—',fit:'★★★☆☆ 唐宋钱、渡来钱在日本市场认可度高',url:NB('Osaka China cash')},
+  {nm:'Champion Auction（冠军 · 香港）',flag:'🇭🇰',rk:'香港本地',rkc:'o',email:'见官网 cghka.cn 寄拍页',dept:'中国钱币（古钱 + GBCA 评级古钱）',comm:'按成交价计佣，官网/邮件确认',intl:'yes',slab:'yes',fit:'★★★☆☆ 香港本地买家群，亚洲征集网络强',url:'https://www.cghka.cn/en/About-Us/Champion-Auction.asp'},
+  {nm:'CNG (Classical Numismatic Group)',flag:'🇺🇸/🇬🇧',rk:'古典+丝路',rkc:'o',email:'cng@cngcoins.com · 见官网寄拍',dept:'以希腊罗马为主，亦收丝路 / 东亚古钱',comm:'按成交价计佣，邮件确认',intl:'yes',slab:'—',fit:'★★☆☆☆ 适合丝路、东亚高古钱，纯中国古钱量少',url:'https://www.cngcoins.com/'},
+  {nm:'NAC (Numismatica Ars Classica)',flag:'🇨🇭',rk:'瑞士顶级',rkc:'red',email:'见官网寄拍页',dept:'顶级古钱拍卖（中国古钱量少但精品价高）',comm:'按成交价计佣，面谈',intl:'yes',slab:'—',fit:'★★☆☆☆ 仅适合极顶级单品，量少',url:'https://www.arsclassicacoins.com/'}
+];
+
+/* ════════════════ 渲染 ════════════════ */
 function renderPlatforms(){
   document.getElementById("platRow").innerHTML = PLATFORMS.map(p=>
     `<div class="plat ${p.id===activePlat?'active':''}" data-id="${p.id}">${p.name}</div>`).join("");
-  document.querySelectorAll(".plat").forEach(el=>el.onclick=()=>{
-    activePlat=el.dataset.id; renderPlatforms();
-  });
+  document.querySelectorAll(".plat").forEach(el=>el.onclick=()=>{ activePlat=el.dataset.id; renderPlatforms(); });
 }
-
-/* 关键词组 */
 function renderKeywords(){
   document.getElementById("kwGroups").innerHTML = KW_GROUPS.map(g=>
     `<div class="kw-group"><div class="gname">${g.name}</div><div class="chips">${
@@ -368,8 +476,6 @@ function renderKeywords(){
     }</div></div>`).join("");
   document.querySelectorAll(".chip").forEach(el=>el.onclick=()=>openSearch(el.dataset.term));
 }
-
-/* 拍卖卡片 */
 const RIBBON = { live:["r-live","● LIVE"], soon:["r-soon","即将开始"], consign:["r-consign","寄拍截止"] };
 function renderAuctions(){
   const order={live:0,soon:1,consign:2};
@@ -377,58 +483,69 @@ function renderAuctions(){
   document.getElementById("auctionGrid").innerHTML = list.map((a,i)=>{
     const [rc,rt]=RIBBON[a.status];
     const cdLabel = a.status==="consign" ? "征集截止" : (a.status==="soon"?"距开拍":"距结拍");
-    const isMail = a.link.startsWith("mailto:");
     const btn = a.status==="consign" ? "联系寄拍" : "进入专场 →";
-    return `<div class="card">
-      <div class="ribbon ${rc}">${rt}</div>
-      <div class="house">${a.house}</div>
-      <h3>${a.title}</h3>
-      <div class="desc">${a.desc}</div>
+    return `<div class="card"><div class="ribbon ${rc}">${rt}</div>
+      <div class="house">${a.house}</div><h3>${a.title}</h3><div class="desc">${a.desc}</div>
       <div class="tags">${a.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
-      <div class="foot">
-        <div class="cd" data-end="${a.end}" id="cd${i}">
-          <div class="lab">${cdLabel}</div><div class="val">--</div>
-        </div>
-        <a class="go" href="${a.link}" target="_blank" rel="noopener">${btn}</a>
-      </div>
-    </div>`;
+      <div class="foot"><div class="cd" data-end="${a.end}" id="cd${i}"><div class="lab">${cdLabel}</div><div class="val">--</div></div>
+      <a class="go" href="${a.link}" target="_blank" rel="noopener">${btn}</a></div></div>`;
   }).join("");
   document.getElementById("liveCount").textContent =
     `${list.filter(a=>a.status==='live').length} 进行中 · ${list.filter(a=>a.status==='soon').length} 即将开始 · ${list.filter(a=>a.status==='consign').length} 征集中`;
 }
-
-/* 平台目录表 */
-function renderHouses(){
-  const pill = c => c==="top" ? `<span class="pill p-top">首选 ★</span>` : `<span class="pill p-yes">接受</span>`;
-  document.getElementById("houseTable").innerHTML = HOUSES.map(h=>
-    `<tr>
-      <td><span class="flag">${h.flag}</span><span class="nm">${h.nm}</span></td>
-      <td>${flagName(h.flag)}</td>
-      <td>${h.role}</td>
-      <td>${pill(h.consign)}</td>
-      <td>${h.fit}</td>
-      <td><a class="tlink" href="${h.url}" target="_blank" rel="noopener">官网 ↗</a></td>
-    </tr>`).join("");
+function renderLots(){
+  document.getElementById("lots").innerHTML = FEATURED.map(x=>
+    `<a class="lot" href="${x.url}" target="_blank" rel="noopener">
+      <div class="pic"><span class="ph">${x.dy.split(' ')[0]}</span>
+        <img src="${x.img}" alt="" loading="lazy" onerror="this.style.display='none'">
+        <span class="st ${x.cls}">${x.stt}</span></div>
+      <div class="body"><span class="dy">${x.dy}</span><div class="ti">${x.ti}</div>
+        <div class="en">${x.en}</div>
+        <div class="ft"><span class="est">${x.est}</span><span class="ho">${x.ho}<br>${x.date}</span></div>
+      </div></a>`).join("");
 }
-function flagName(f){return {"🇺🇸":"美国","🇬🇧":"英国","🇨🇭":"瑞士","🇩🇪":"德国","🇯🇵":"日本","🌐":"在线"}[f]||""}
-
-/* 倒计时 + 时钟 */
+function renderDynasties(){
+  document.getElementById("dyn").innerHTML = DYNASTIES.map(x=>
+    `<div class="d" data-q="${x.q}"><div class="era">${x.era}</div><div class="ex">${x.ex}</div></div>`).join("");
+  document.querySelectorAll(".dyn .d").forEach(el=>el.onclick=()=>openSearch(el.dataset.q));
+}
+function renderTiers(){
+  document.getElementById("tiers").innerHTML = TIERS.map(t=>
+    `<div class="tier"><div class="t">${t.t}<span class="stars">${t.s}</span></div>
+      <div class="kw">${t.kw.map(k=>`<span data-k="${k}">${k}</span>`).join("")}</div></div>`).join("");
+  document.querySelectorAll(".tier .kw span").forEach(s=>s.onclick=()=>openSearch(s.dataset.k));
+}
+function renderPCards(){
+  document.getElementById("pcards").innerHTML = PCARDS.map(c=>
+    `<div class="pcard"><div class="name"><span>${c.flag||''}</span>${c.name}</div>
+      ${c.tag?`<div class="ptag">${c.tag}</div>`:''}<div class="pdesc">${c.desc}</div>
+      <div class="plinks">${c.links.map(l=>`<a href="${l.u}" target="_blank" rel="noopener">${l.t}</a>`).join("")}</div></div>`).join("");
+}
+function renderConsign(){
+  const yn = v => v==='yes' ? '<span class="yes">可</span>' : (v==='no'?'<span class="no">否</span>':'<span style="color:#9a8a6e">—</span>');
+  document.getElementById("consign").innerHTML = CONSIGN.map(h=>
+    `<div class="conhouse"><div class="hd"><span>${h.flag}</span><span class="nm">${h.nm}</span><span class="rk ${h.rkc}">${h.rk}</span></div>
+      <div class="rows">
+        <div class="r"><span class="k">联系</span><span class="v">${h.email}</span></div>
+        <div class="r"><span class="k">古钱负责</span><span class="v">${h.dept}</span></div>
+        <div class="r"><span class="k">佣金</span><span class="v">${h.comm}</span></div>
+        <div class="r"><span class="k">海外寄拍</span><span class="v">${yn(h.intl)}　·　代送 PCGS/NGC ${yn(h.slab)}</span></div>
+        <div class="r"><span class="k">适合度</span><span class="v">${h.fit}</span></div>
+      </div>
+      <div class="act"><a href="${h.url}" target="_blank" rel="noopener">前往寄拍页 →</a></div></div>`).join("");
+}
 function tick(){
   const now=new Date();
   document.getElementById("clock").textContent = now.toLocaleTimeString("zh-CN",{hour12:false});
-  document.getElementById("date").textContent =
-    now.toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+  document.getElementById("date").textContent = now.toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
   document.querySelectorAll(".cd").forEach(el=>{
     const end=new Date(el.dataset.end), diff=end-now, v=el.querySelector(".val");
     if(diff<=0){ v.textContent="已结束 / 已截止"; el.classList.add("ended"); return; }
-    const d=Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5),
-          m=Math.floor(diff%36e5/6e4), s=Math.floor(diff%6e4/1e3);
+    const d=Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4), s=Math.floor(diff%6e4/1e3);
     v.textContent = d>0 ? `${d}天 ${h}时 ${m}分` : `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
   });
 }
-
-/* init */
-renderPlatforms(); renderKeywords(); renderAuctions(); renderHouses();
+renderPlatforms(); renderKeywords(); renderAuctions(); renderLots(); renderDynasties(); renderTiers(); renderPCards(); renderConsign();
 document.getElementById("asof").textContent = AS_OF;
 tick(); setInterval(tick,1000);
 </script>
