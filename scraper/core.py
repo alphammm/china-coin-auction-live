@@ -130,6 +130,7 @@ class SourceHealth:
     kept: int = 0
     http: list = field(default_factory=list)
     note: str = ""
+    probe: dict = field(default_factory=dict)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -490,21 +491,46 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
             health.http.append(f"{q}|p{page}: {r.status_code} {ct} {len(r.content)}B")
 
             if probe_only:
-                body = r.text[:4000]
+                body = r.text
                 flags = []
-                if re.search(r"cloudflare|cf-browser-verification|Just a moment", body, re.I):
+                if re.search(r"cloudflare|cf-browser-verification|Just a moment", body[:6000], re.I):
                     flags.append("CLOUDFLARE")
-                if re.search(r"captcha|px-captcha|perimeterx", body, re.I):
-                    flags.append("CAPTCHA")
+                if re.search(r"captcha|px-captcha|perimeterx|datadome", body[:6000], re.I):
+                    flags.append("BOT-WALL")
                 if "__NEXT_DATA__" in body:
                     flags.append("NEXT_DATA")
                 if "application/ld+json" in body:
                     flags.append("JSON-LD")
-                jade_hits = len(re.findall(r"jade", r.text, re.I))
+                jade_hits = len(re.findall(r"jade", body, re.I))
+                counts, examples = {}, []
+                if r.status_code < 400:
+                    soup = BeautifulSoup(body, "lxml")
+                    for fn, nm in ((parse_configured, "configured"),
+                                   (parse_jsonld, "jsonld"),
+                                   (parse_links, "links")):
+                        try:
+                            got = fn(soup, src, url)
+                        except Exception as e:                   # noqa: BLE001
+                            got = []
+                            flags.append(f"{nm}-ERR:{type(e).__name__}")
+                        counts[nm] = len(got)
+                        if got and not examples:
+                            examples = [g["title"][:90] for g in got[:3]]
+                    if src.get("method") == "json" or ct == "application/json":
+                        try:
+                            counts["json"] = len(parse_json_api(r.json(), src, url))
+                        except Exception:                        # noqa: BLE001
+                            counts["json"] = -1
+                health.probe = {
+                    "http": r.status_code, "ct": ct, "bytes": len(r.content),
+                    "jade_mentions": jade_hits, "flags": flags,
+                    "counts": counts, "examples": examples, "url": url,
+                }
                 samples.append(
                     f"\n{'='*78}\n[{src['id']}] {url}\n  HTTP {r.status_code} {ct} "
                     f"{len(r.content)}B  jade_mentions={jade_hits}  flags={','.join(flags) or '-'}\n"
-                    f"{'-'*78}\n{body[:2200]}\n")
+                    f"  parsers={counts}  examples={examples}\n"
+                    f"{'-'*78}\n{body[:1400]}\n")
                 continue
 
             if r.status_code >= 400:
@@ -583,12 +609,31 @@ def main(argv):
             f"[{health.strategy or '-'}] {time.time()-t0:.1f}s  {health.http[:2]}")
 
     if probe_only:
-        log("\n\n" + "#" * 78 + "\n# 原始响应样本（用于校正选择器）\n" + "#" * 78)
-        for s in all_samples:
-            log(s)
         os.makedirs(DATA_DIR, exist_ok=True)
         with open(os.path.join(DATA_DIR, "probe.txt"), "w", encoding="utf-8") as f:
             f.write("\n".join(all_samples))
+        log("\n\n" + "#" * 100 + "\n# 原始响应样本（各 1400 字符，用于校正选择器）\n" + "#" * 100)
+        for smp in all_samples:
+            log(smp)
+        log("\n\n" + "#" * 100)
+        log(f"# 探测诊断表  {datetime.now(timezone.utc).isoformat(timespec='seconds')}")
+        log("#" * 100)
+        log(f"{'源':<18}{'HTTP':>5} {'字节':>9} {'jade':>6}  "
+            f"{'cfg':>4}{'jsonld':>7}{'links':>6}{'json':>5}  标志 / 首条示例")
+        log("-" * 100)
+        for h in healths:
+            p = h.probe or {}
+            c = p.get("counts", {})
+            ex = (p.get("examples") or [""])[0][:44]
+            log(f"{h.id:<18}{str(p.get('http','-')):>5} {str(p.get('bytes','-')):>9} "
+                f"{str(p.get('jade_mentions','-')):>6}  "
+                f"{str(c.get('configured','-')):>4}{str(c.get('jsonld','-')):>7}"
+                f"{str(c.get('links','-')):>6}{str(c.get('json','-')):>5}  "
+                f"{','.join(p.get('flags') or []) or '-'} | {ex}")
+        log("-" * 100)
+        usable = [h.id for h in healths if (h.probe.get("counts") or {}) and
+                  max((h.probe.get("counts") or {}).values() or [0]) > 0]
+        log(f"可解析的源（至少一种策略有产出）：{len(usable)}/{len(healths)} → {', '.join(usable)}")
         return 0
 
     # 去重：同 URL 只留一条；同标题 + 同拍行 视为重复（聚合站与官网重复）

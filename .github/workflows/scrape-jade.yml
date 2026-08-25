@@ -1,6 +1,11 @@
 name: 抓取海外中国古玉拍品
 
 on:
+  push:
+    branches: ["claude/jade-auction-site-k53mke"]
+    paths:                      # 只在抓取器/工作流变更时触发，data/ 的回写不会造成自触发循环
+      - "scraper/**"
+      - ".github/workflows/scrape-jade.yml"
   schedule:
     # 每 3 小时一次（GitHub 的 schedule 只在默认分支上生效，合并到 main 后才会自动跑）
     - cron: "17 */3 * * *"
@@ -39,14 +44,15 @@ jobs:
       - name: 安装依赖
         run: pip install -r scraper/requirements.txt
 
-      - name: 运行抓取器
-        id: run
-        run: |
-          ARGS=""
-          if [ "${{ inputs.mode }}" = "probe" ]; then ARGS="--probe"; fi
-          if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only=${{ inputs.only }}"; fi
-          echo "参数: $ARGS"
-          python scraper/core.py $ARGS
+      # push 触发时没有 inputs，两步都会跑：先探测（拿诊断表），再正式抓取
+      - name: 探测各源响应特征
+        if: inputs.mode != 'scrape'
+        continue-on-error: true
+        run: python scraper/core.py --probe ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
+
+      - name: 正式抓取
+        if: inputs.mode != 'probe'
+        run: python scraper/core.py ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
 
       - name: 上传探测样本
         if: always()
