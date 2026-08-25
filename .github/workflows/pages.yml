@@ -32,6 +32,8 @@ jobs:
           echo "已打包："; find _site -type f | sed 's/^/  /'
 
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true      # 仓库未开 Pages 时直接用 API 打开，省掉手动切换
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
