@@ -1,0 +1,311 @@
+# ══════════════════════════════════════════════════════════════════════════
+# 海外（中国大陆以外）中国古玉 / 翡翠 拍卖源
+#
+# 字段说明
+#   id/name/region/country  展示与分组用
+#   method    html（默认）| json
+#   url       {q}=URL 编码关键词  {q_raw}=原文  {page}=页码
+#   queries   该源要跑的检索词（越精准越少噪音）
+#   pages     每个词翻几页
+#   item      每个拍品卡片的 CSS 选择器（可给数组，依次尝试）
+#   fields    卡片内取值："css | text" / "css | attr:href"
+#   json      method=json 时的取值路径（点号路径，数字表示数组下标）
+#   lot_url_pattern  兜底策略：符合此正则的链接即视为一个拍品
+#
+# 选择器多为首版推测值 —— 以 GitHub Actions 上 `--probe` 的真实响应为准逐个校正。
+# 解析器会自动降级：configured → jsonld → links，健康报告里会写明实际命中哪一级。
+# ══════════════════════════════════════════════════════════════════════════
+sources:
+
+  # ───────────────────────── 聚合平台 ─────────────────────────
+  - id: auctionet
+    name: Auctionet
+    region: 欧陆
+    country: SE
+    home: https://auctionet.com/
+    url: "https://auctionet.com/en/search?q={q}&is_ended=0&page={page}"
+    queries: ["chinese jade", "jade carving china", "jadeite chinese", "nephrite chinese"]
+    pages: 2
+    item: ["div.item-container", "article.item", "li.item"]
+    fields:
+      title: "h3 a | text"
+      url: "h3 a | attr:href"
+      image: "img | attr:src"
+      price: ".item-bid, .bid | text"
+      end: "time | attr:datetime"
+      house: ".item-auction-house, .auction-house | text"
+    lot_url_pattern: "auctionet\\.com/[a-z]{2}/\\d+"
+
+  - id: barnebys
+    name: Barnebys
+    region: 聚合
+    country: SE
+    home: https://www.barnebys.com/
+    url: "https://www.barnebys.com/search?q={q}&sort=ending"
+    queries: ["chinese jade", "jade cong", "chinese jadeite"]
+    pages: 2
+    item: ["div[data-testid='lot-card']", "article", "div.lot-card"]
+    fields:
+      title: "a | text"
+      url: "a | attr:href"
+      image: "img | attr:src"
+    lot_url_pattern: "barnebys\\.com/(auctions/lot|realized-prices|lot)/"
+
+  - id: lottissimo
+    name: Lot-tissimo
+    region: 欧陆
+    country: DE
+    home: https://www.lot-tissimo.com/
+    url: "https://www.lot-tissimo.com/en/search?query={q}"
+    queries: ["chinese jade", "jade china"]
+    pages: 2
+    lot_url_pattern: "lot-tissimo\\.com/[a-z]{2}/[^/]+/lot"
+
+  - id: bidsquare
+    name: Bidsquare
+    region: 美国
+    country: US
+    home: https://www.bidsquare.com/
+    url: "https://www.bidsquare.com/search?q={q}"
+    queries: ["chinese jade", "jadeite", "jade carving"]
+    pages: 2
+    lot_url_pattern: "bidsquare\\.com/(online-auctions|auctions)/[^/]+/[^/]+"
+
+  - id: invaluable
+    name: Invaluable
+    region: 聚合
+    country: US
+    home: https://www.invaluable.com/
+    url: "https://www.invaluable.com/search?keyword={q}&upcoming=true"
+    queries: ["chinese jade"]
+    pages: 1
+    lot_url_pattern: "invaluable\\.com/auction-lot/"
+
+  - id: liveauctioneers
+    name: LiveAuctioneers
+    region: 美国
+    country: US
+    home: https://www.liveauctioneers.com/
+    url: "https://www.liveauctioneers.com/search/?keyword={q}&status=online"
+    queries: ["chinese jade"]
+    pages: 1
+    lot_url_pattern: "liveauctioneers\\.com/item/\\d+"
+
+  - id: saleroom
+    name: the-saleroom (ATG)
+    region: 英国
+    country: GB
+    home: https://www.the-saleroom.com/
+    url: "https://www.the-saleroom.com/en-gb/search-results?searchTerm={q}"
+    queries: ["chinese jade"]
+    pages: 1
+    lot_url_pattern: "the-saleroom\\.com/en-gb/auction-catalogues/[^/]+/catalogue-id-[^/]+/lot-"
+
+  - id: catawiki
+    name: Catawiki
+    region: 欧陆
+    country: NL
+    home: https://www.catawiki.com/
+    url: "https://www.catawiki.com/en/s?q={q}"
+    queries: ["chinese jade", "jade china"]
+    pages: 2
+    lot_url_pattern: "catawiki\\.com/en/l/\\d+"
+
+  - id: drouot
+    name: Drouot
+    region: 欧陆
+    country: FR
+    home: https://www.drouot.com/
+    url: "https://www.drouot.com/en/r?query={q}"
+    queries: ["jade chinois", "chinese jade"]
+    pages: 1
+    lot_url_pattern: "drouot\\.com/[a-z]{2}/l/"
+
+  - id: interencheres
+    name: Interencheres
+    region: 欧陆
+    country: FR
+    home: https://www.interencheres.com/
+    url: "https://www.interencheres.com/recherche/lots?q={q}"
+    queries: ["jade chinois", "jade chine"]
+    pages: 1
+    lot_url_pattern: "interencheres\\.com/[^/]+/[^/]+-\\d+/"
+
+  - id: lauritz
+    name: Lauritz
+    region: 欧陆
+    country: DK
+    home: https://www.lauritz.com/
+    url: "https://www.lauritz.com/en/search/?q={q}"
+    queries: ["chinese jade", "jade kina"]
+    pages: 1
+    lot_url_pattern: "lauritz\\.com/[a-z]{2}/auction/[^/]+/\\d+"
+
+  - id: bukowskis
+    name: Bukowskis
+    region: 欧陆
+    country: SE
+    home: https://www.bukowskis.com/
+    url: "https://www.bukowskis.com/en/search?query={q}"
+    queries: ["chinese jade", "jade kinesisk"]
+    pages: 1
+    lot_url_pattern: "bukowskis\\.com/[a-z]{2}/lots/\\d+"
+
+  - id: easylive
+    name: Easy Live Auction
+    region: 英国
+    country: GB
+    home: https://www.easyliveauction.com/
+    url: "https://www.easyliveauction.com/search/?searchterm={q}"
+    queries: ["chinese jade"]
+    pages: 1
+    lot_url_pattern: "easyliveauction\\.com/catalogue/lot/"
+
+  # ───────────────────────── 国际大行 ─────────────────────────
+  - id: bonhams
+    name: Bonhams
+    region: 英国
+    country: GB
+    home: https://www.bonhams.com/
+    url: "https://www.bonhams.com/search/?q={q}&sort=date"
+    queries: ["chinese jade", "jadeite", "jade carving"]
+    pages: 2
+    item: ["li.lot-list-item", "div.lot-card", "article.lot"]
+    fields:
+      title: "a.lot-link, h3 a | text"
+      url: "a.lot-link, h3 a | attr:href"
+      image: "img | attr:src"
+      price: ".estimate, .lot-estimate | text"
+    lot_url_pattern: "bonhams\\.com/auction/\\d+/lot/\\d+"
+
+  - id: christies
+    name: Christie's
+    region: 国际
+    country: GB
+    home: https://www.christies.com/
+    url: "https://www.christies.com/en/search?keyword={q}&sortby=relevance"
+    queries: ["chinese jade"]
+    pages: 1
+    lot_url_pattern: "christies\\.com/en/lot/lot-\\d+"
+
+  - id: sothebys
+    name: Sotheby's
+    region: 国际
+    country: US
+    home: https://www.sothebys.com/
+    url: "https://www.sothebys.com/en/search?query={q}"
+    queries: ["chinese jade"]
+    pages: 1
+    lot_url_pattern: "sothebys\\.com/en/buy/auction/\\d{4}/[^/]+/"
+
+  - id: heritage
+    name: Heritage Auctions
+    region: 美国
+    country: US
+    home: https://fineart.ha.com/
+    url: "https://fineart.ha.com/c/search-results.zx?N=0&Ntt={q}&ic4=ResultsGrid"
+    queries: ["chinese jade", "jade carving"]
+    pages: 1
+    lot_url_pattern: "ha\\.com/itm/|ha\\.com/c/item"
+
+  # ───────────────────────── 英国 / 欧陆中型行 ─────────────────────────
+  - id: woolleyandwallis
+    name: Woolley & Wallis
+    region: 英国
+    country: GB
+    home: https://www.woolleyandwallis.co.uk/
+    url: "https://www.woolleyandwallis.co.uk/search/?searchterm={q}"
+    queries: ["jade", "chinese jade"]
+    pages: 1
+    lot_url_pattern: "woolleyandwallis\\.co\\.uk/(auctions|departments)/.+/lot"
+
+  - id: roseberys
+    name: Roseberys London
+    region: 英国
+    country: GB
+    home: https://www.roseberys.co.uk/
+    url: "https://www.roseberys.co.uk/search?q={q}"
+    queries: ["jade", "chinese jade"]
+    pages: 1
+    lot_url_pattern: "roseberys\\.co\\.uk/bidding/[A-Z]?\\d+"
+
+  - id: lyonandturnbull
+    name: Lyon & Turnbull
+    region: 英国
+    country: GB
+    home: https://www.lyonandturnbull.com/
+    url: "https://www.lyonandturnbull.com/search?q={q}"
+    queries: ["jade", "chinese jade"]
+    pages: 1
+    lot_url_pattern: "lyonandturnbull\\.com/auction/lot/"
+
+  - id: tennants
+    name: Tennants
+    region: 英国
+    country: GB
+    home: https://www.tennants.co.uk/
+    url: "https://auctions.tennants.co.uk/search?searchterm={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "tennants\\.co\\.uk/(auction|lot)/"
+
+  - id: sworders
+    name: Sworders
+    region: 英国
+    country: GB
+    home: https://www.sworder.co.uk/
+    url: "https://www.sworder.co.uk/search/?q={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "sworder\\.co\\.uk/auction/lot/"
+
+  - id: dreweatts
+    name: Dreweatts
+    region: 英国
+    country: GB
+    home: https://www.dreweatts.com/
+    url: "https://www.dreweatts.com/search?q={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "dreweatts\\.com/(auction|lot)/"
+
+  - id: chiswick
+    name: Chiswick Auctions
+    region: 英国
+    country: GB
+    home: https://www.chiswickauctions.co.uk/
+    url: "https://www.chiswickauctions.co.uk/search?q={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "chiswickauctions\\.co\\.uk/(auction|lot)/"
+
+  # ───────────────────────── 美国专业行 ─────────────────────────
+  - id: igavel
+    name: iGavel (Lark Mason)
+    region: 美国
+    country: US
+    home: https://bid.igavelauctions.com/
+    url: "https://bid.igavelauctions.com/search?q={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "igavelauctions\\.com/(bidding|lot|item)"
+
+  - id: hindman
+    name: Freeman's | Hindman
+    region: 美国
+    country: US
+    home: https://hindmanauctions.com/
+    url: "https://hindmanauctions.com/search?q={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "hindmanauctions\\.com/auction-lot/|/lot/"
+
+  - id: doyle
+    name: Doyle
+    region: 美国
+    country: US
+    home: https://doyle.com/
+    url: "https://doyle.com/search?q={q}"
+    queries: ["chinese jade", "jade"]
+    pages: 1
+    lot_url_pattern: "doyle\\.com/auctions/[^/]+/lot"
