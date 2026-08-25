@@ -29,6 +29,7 @@ sources:
   pages: 3
   browser: true
   lot_url_pattern: auctionet\.com/[a-z]{2}/\d+
+  timeout: 35
 - id: hibid
   name: HiBid（北美数千家小拍行）
   region: 美国
@@ -120,6 +121,7 @@ sources:
   pages: 3
   browser: true
   lot_url_pattern: the-saleroom\.com/en-gb/auction-catalogues/.+/lot-
+  timeout: 45
 - id: ibidder
   name: i-bidder（ATG 英国）
   region: 英国
@@ -133,6 +135,7 @@ sources:
   pages: 2
   browser: true
   lot_url_pattern: i-bidder\.com/en-gb/auction-catalogues/.+/lot-
+  timeout: 45
 - id: easylive
   name: Easy Live Auction（英国小行）
   region: 英国

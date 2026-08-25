@@ -128,6 +128,7 @@ class Lot:
     est_low: float | None = None
     est_high: float | None = None
     end_ts: str = ""
+    end_approx: bool = False
     lot_no: str = ""
     period: str = "未标注"
     material: str = "未标注"
@@ -506,7 +507,9 @@ def enrich_lots(lots: list, workers: int = 8, cap: int = 900):
                 cur, lo, hi = parse_money(d["price_text"])
                 lot.currency, lot.est_low, lot.est_high = cur or lot.currency, lo or lot.est_low, hi or lot.est_high
             if d.get("end"):
-                lot.end_ts = parse_end(d["end"]) or lot.end_ts
+                real = parse_end(d["end"])
+                if real:
+                    lot.end_ts, lot.end_approx = real, False
             if d.get("house") and 2 < len(d["house"]) < 60:
                 lot.house = d["house"]
     log(f"  详情页回访完成：{done} 条")
@@ -589,6 +592,31 @@ def clean_title(t: str) -> str:
     return t
 
 
+REL_RE = re.compile(
+    r"(?:(\d+)\s*(?:days?|d)\b)?\s*(?:(\d+)\s*(?:hours?|hrs?|h)\b)?\s*(?:(\d+)\s*(?:minutes?|mins?|m)\b)?",
+    re.I)
+
+
+def parse_relative_end(text: str) -> str:
+    """把搜索卡片上的倒计时（3 days / 21 hours / 1 h 14 m）折算成截拍时刻。
+    只是近似值 —— 精确时间以拍行页面为准，前端会标注为约。"""
+    if not text:
+        return ""
+    m = re.search(r"\b(\d+)\s*(days?|d)\b", text, re.I)
+    days = int(m.group(1)) if m else 0
+    m = re.search(r"\b(\d+)\s*(hours?|hrs?|h)\b", text, re.I)
+    hours = int(m.group(1)) if m else 0
+    m = re.search(r"\b(\d+)\s*(minutes?|mins?|m)\b(?!\w)", text, re.I)
+    mins = int(m.group(1)) if m else 0
+    if not (days or hours or mins):
+        return ""
+    if days > 400:
+        return ""
+    from datetime import timedelta
+    return (datetime.now(timezone.utc) + timedelta(days=days, hours=hours, minutes=mins)
+            ).isoformat(timespec="seconds")
+
+
 def is_target(title: str, query: str) -> tuple[bool, str]:
     """返回 (是否收录, 原因)。用户口径：中国古玉含翡翠，清代及以前，海外拍行。"""
     t = title or ""
@@ -625,7 +653,8 @@ def make_lot(raw: dict, src: dict, query: str, strategy: str) -> Lot | None:
         title=title[:300], url=url, image=raw.get("image", "") or "",
         price_text=(raw.get("price_text") or "").strip()[:80],
         currency=cur, est_low=lo, est_high=hi,
-        end_ts=parse_end(raw.get("end", "")),
+        end_ts=parse_end(raw.get("end", "")) or parse_relative_end(raw.get("title", "")),
+        end_approx=not parse_end(raw.get("end", "")) and bool(parse_relative_end(raw.get("title", ""))),
         lot_no=(raw.get("lot_no") or "").strip()[:20],
         period=classify_period(title), material=classify_material(text),
         query=query, strategy=strategy,

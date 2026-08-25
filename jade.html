@@ -793,8 +793,10 @@ function renderFeed(){
     const badges = [`<span class="bg">${l.period}</span>`,
                     l.material!=="未标注"?`<span class="bg mat">${l.material}</span>`:""].join("");
     const price = l.price_text || (l.est_low?`${l.currency||""} ${l.est_low.toLocaleString()}`:"");
-    const cd = l.end_ts ? `<span class="cdown" data-end="${l.end_ts}">--</span>`
-                        : `<span class="cdown" style="color:var(--muted)">见拍行页</span>`;
+    const cd = l.end_ts
+      ? `<span class="cdown" data-end="${l.end_ts}" data-approx="${l.end_approx?1:0}"
+              title="${l.end_approx?'由拍行卡片上的倒计时折算，为近似值':'来自拍行页面'}">--</span>`
+      : `<span class="cdown" style="color:var(--ink3)">见拍行页</span>`;
     return `<a class="fl" href="${l.url}" target="_blank" rel="noopener">
       <div class="pic"><span class="noimg">玉</span>${img}<div class="badges">${badges}</div></div>
       <div class="body">
@@ -936,7 +938,8 @@ function tick(){
     if(isNaN(diff)){ el.textContent="—"; return; }
     if(diff<=0){ el.textContent="已结拍"; el.style.color="var(--muted)"; return; }
     const d=Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4);
-    el.textContent = d>0 ? `${d}天${h}时` : `${h}时${m}分`;
+    const pre = el.dataset.approx === "1" ? "约" : "";
+    el.textContent = pre + (d>0 ? `${d}天${h}时` : `${h}时${m}分`);
     el.classList.toggle("soonest", diff < 864e5);
   });
   document.querySelectorAll(".cd[data-end]").forEach(el=>{
