@@ -142,6 +142,8 @@ class Lot:
     query: str = ""
     strategy: str = ""
     scraped_at: str = ""
+    first_seen: str = ""
+    last_seen: str = ""
 
 
 @dataclass
@@ -901,6 +903,62 @@ def main(argv):
         before = len(uniq)
         uniq = [l for l in uniq if is_target(l.title, l.query)[0]]
         log(f"  富化后二次过滤：{before} → {len(uniq)} 条")
+
+    # ── 与上一轮合并 ──────────────────────────────────────────────
+    # 详情页回访会被限流，同一批数据两轮之间富化成功率能差一个数量级
+    # （实测带估价 204 → 19、拍行数 60 → 14）。所以不做全量覆盖：
+    # 新一轮继承上一轮已富化的字段，且近期见过的条目保留 5 天。
+    now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    prev_lots = {}
+    prev_path = os.path.join(DATA_DIR, "lots.json")
+    if os.path.exists(prev_path):
+        try:
+            with open(prev_path, encoding="utf-8") as f:
+                prev = json.load(f)
+            prev_lots = {l["id"]: l for l in prev.get("lots", [])}
+        except Exception:                                        # noqa: BLE001
+            prev_lots = {}
+
+    for lot in uniq:
+        old = prev_lots.get(lot.id)
+        lot.last_seen = now_iso
+        lot.first_seen = (old or {}).get("first_seen") or now_iso
+        if not old:
+            continue
+        # 本轮没富化到的字段，用上一轮的补
+        if not lot.image and old.get("image"):
+            lot.image = old["image"]
+        if not lot.price_text and old.get("price_text"):
+            lot.price_text = old["price_text"]
+            lot.currency, lot.est_low, lot.est_high = (
+                old.get("currency", ""), old.get("est_low"), old.get("est_high"))
+        if not lot.end_ts and old.get("end_ts"):
+            lot.end_ts, lot.end_approx = old["end_ts"], old.get("end_approx", False)
+        if old.get("house") and old["house"] != old.get("source") and len(lot.house) > 24:
+            lot.house = old["house"]          # 源名往往很长，真实拍行名短
+        if old.get("region") and lot.region in ("聚合", "国际"):
+            lot.region = old["region"]
+        if lot.period == "未标注" and old.get("period", "未标注") != "未标注":
+            lot.period = old["period"]
+        if lot.material == "未标注" and old.get("material", "未标注") != "未标注":
+            lot.material = old["material"]
+
+    # 近期见过、这轮没抓到的条目再留 5 天（拍行下架或检索词没命中都可能）
+    seen_now = {l.id for l in uniq}
+    cutoff = (datetime.now(timezone.utc) - __import__("datetime").timedelta(days=5)).isoformat()
+    carried = 0
+    for lid, old in prev_lots.items():
+        if lid in seen_now:
+            continue
+        if (old.get("last_seen") or old.get("scraped_at") or "") < cutoff:
+            continue
+        try:
+            uniq.append(Lot(**{k: v for k, v in old.items() if k in Lot.__dataclass_fields__}))
+            carried += 1
+        except Exception:                                        # noqa: BLE001
+            pass
+    if carried:
+        log(f"  沿用上一轮仍在有效期内的条目：{carried} 条")
 
     uniq.sort(key=lambda x: (x.end_ts or "9999", x.house))
     payload = {
