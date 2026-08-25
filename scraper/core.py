@@ -301,7 +301,13 @@ def parse_links(soup, src, page_url):
         href = urljoin(page_url, a["href"])
         if not rx.search(href) or href in seen:
             continue
-        text = re.sub(r"\s+", " ", a.get_text(" ", strip=True)).strip()
+        text = (a.get("title") or "").strip()
+        if len(text) < 12:
+            im0 = a.select_one("img[alt]")
+            if im0 and len(im0.get("alt", "")) > 11:
+                text = im0["alt"].strip()
+        if len(text) < 12:
+            text = re.sub(r"\s+", " ", a.get_text(" ", strip=True)).strip()
         if len(text) < 12:
             # 锚点常是图片，向上找卡片容器取文本
             box = a.find_parent(["li", "article", "div"])
@@ -397,6 +403,113 @@ def parse_json_api(payload, src, page_url):
     return out
 
 
+# ══════════════════════ 详情页富化 ══════════════════════════════════════
+# 检索结果页的卡片结构每家都不同，硬写选择器既脆又不可扩展；
+# 但拍品详情页几乎家家都有 og: 标签或 schema.org Product —— 那里的标题、
+# 图片、估价、拍行名是干净且统一的。于是：搜索页只负责发现 lot 链接，
+# 字段一律回到详情页取。
+DETAIL_CACHE: dict[str, dict] = {}
+
+
+def _jsonld_product(soup):
+    best = {}
+    for tag in soup.find_all("script", attrs={"type": "application/ld+json"}):
+        try:
+            data = json.loads(tag.string or tag.get_text() or "")
+        except Exception:                                        # noqa: BLE001
+            continue
+        acc = []
+        _walk_products(data, acc)
+        for p in acc:
+            item = p.get("item") if isinstance(p.get("item"), dict) else p
+            if not isinstance(item, dict) or not item.get("name"):
+                continue
+            if len(str(item.get("name", ""))) > len(str(best.get("name", ""))):
+                best = item
+    return best
+
+
+def fetch_detail(url: str, timeout: int = 20) -> dict:
+    if url in DETAIL_CACHE:
+        return DETAIL_CACHE[url]
+    out: dict = {}
+    try:
+        r = SESSION.get(url, timeout=timeout, allow_redirects=True)
+        if r.status_code >= 400 or "html" not in (r.headers.get("content-type") or ""):
+            DETAIL_CACHE[url] = out
+            return out
+        soup = BeautifulSoup(r.text, "lxml")
+
+        def og(prop):
+            el = (soup.find("meta", attrs={"property": f"og:{prop}"})
+                  or soup.find("meta", attrs={"name": f"og:{prop}"})
+                  or soup.find("meta", attrs={"name": prop}))
+            return (el.get("content") or "").strip() if el else ""
+
+        prod = _jsonld_product(soup)
+        offers = prod.get("offers") or {}
+        if isinstance(offers, list):
+            offers = offers[0] if offers else {}
+        img = prod.get("image") or og("image")
+        if isinstance(img, list):
+            img = img[0] if img else ""
+        if isinstance(img, dict):
+            img = img.get("url", "")
+        seller = prod.get("seller") or prod.get("brand") or {}
+        if isinstance(seller, dict):
+            seller = seller.get("name", "")
+        price = offers.get("price") or offers.get("lowPrice") or ""
+        cur = offers.get("priceCurrency") or ""
+        title = str(prod.get("name") or og("title") or
+                    (soup.title.get_text(strip=True) if soup.title else ""))
+        out = {
+            "title": re.sub(r"\s+", " ", title).strip()[:300],
+            "image": str(img or ""),
+            "desc": re.sub(r"\s+", " ", str(prod.get("description") or og("description") or ""))[:400],
+            "price_text": (f"{cur} {price}".strip() if price else ""),
+            "end": str(offers.get("availabilityEnds") or offers.get("validThrough") or ""),
+            "house": str(seller or og("site_name") or ""),
+        }
+    except Exception:                                            # noqa: BLE001
+        out = {}
+    DETAIL_CACHE[url] = out
+    return out
+
+
+def enrich_lots(lots: list, workers: int = 8, cap: int = 900):
+    """并发回访详情页，用 og:/JSON-LD 覆盖搜索页抓来的脏字段。"""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    todo = lots[:cap]
+    log(f"▶ 详情页富化：{len(todo)} 条（{workers} 并发）")
+    done = 0
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = {ex.submit(fetch_detail, lot.url): lot for lot in todo}
+        for fut in as_completed(futs):
+            lot = futs[fut]
+            try:
+                d = fut.result()
+            except Exception:                                    # noqa: BLE001
+                d = {}
+            done += 1
+            if not d:
+                continue
+            if d.get("title") and len(d["title"]) > 8:
+                lot.title = d["title"]
+                lot.period = classify_period(lot.title + " " + d.get("desc", ""))
+                lot.material = classify_material(lot.title + " " + d.get("desc", ""))
+            if d.get("image"):
+                lot.image = d["image"]
+            if d.get("price_text"):
+                lot.price_text = d["price_text"][:80]
+                cur, lo, hi = parse_money(d["price_text"])
+                lot.currency, lot.est_low, lot.est_high = cur or lot.currency, lo or lot.est_low, hi or lot.est_high
+            if d.get("end"):
+                lot.end_ts = parse_end(d["end"]) or lot.end_ts
+            if d.get("house") and 2 < len(d["house"]) < 60:
+                lot.house = d["house"]
+    log(f"  详情页回访完成：{done} 条")
+
+
 # ══════════════════════ 归一化 / 分类 / 过滤 ══════════════════════════════
 def classify_period(text: str) -> str:
     for name, rx in PERIOD_RULES:
@@ -458,11 +571,29 @@ def parse_end(text: str) -> str:
     return ""
 
 
+NOISE_RE = re.compile(
+    r"\s*\b(\d+\s*(days?|hours?|h|m|min)\b.*$|\d+\s*bids?\b.*$|"
+    r"(current\s*bid|estimate|starting\s*(bid|price)|opening\s*bid|sold\s*for)\b.*$)", re.I)
+FAKE_RE = re.compile(
+    r"\b(faux|imitation|simulated|in the style of|after the|style of|"
+    r"glass|resin|plastic|composition|serpentine|bowenite|soapstone|"
+    r"reproduction|replica)\b", re.I)
+
+
+def clean_title(t: str) -> str:
+    t = re.sub(r"\s+", " ", t or "").strip()
+    t = NOISE_RE.sub("", t)
+    t = re.sub(r"[·|•]\s*$", "", t).strip(" .,-–—…")
+    return t
+
+
 def is_target(title: str, query: str) -> tuple[bool, str]:
     """返回 (是否收录, 原因)。用户口径：中国古玉含翡翠，清代及以前，海外拍行。"""
     t = title or ""
     if not JADE_RE.search(t):
         return False, "no-jade-term"
+    if FAKE_RE.search(t):
+        return False, "faux-or-imitation"
     # hardstone 太宽：必须另有中国信号
     if not re.search(r"\b(jade|jadeite|jadeit|nephrite|jadéite|feicui)\b|玉|翡翠", t, re.I):
         if not CHINA_RE.search(t):
@@ -479,7 +610,7 @@ def is_target(title: str, query: str) -> tuple[bool, str]:
 
 
 def make_lot(raw: dict, src: dict, query: str, strategy: str) -> Lot | None:
-    title = re.sub(r"\s+", " ", raw.get("title", "")).strip()
+    title = clean_title(raw.get("title", ""))
     url = raw.get("url", "").strip()
     if not (title and url):
         return None
@@ -692,6 +823,20 @@ def main(argv):
         usable = [h.id for h in healths if (h.probe.get("counts") or {}) and
                   max((h.probe.get("counts") or {}).values() or [0]) > 0]
         log(f"可解析的源（至少一种策略有产出）：{len(usable)}/{len(healths)} → {', '.join(usable)}")
+
+        log("\n\n" + "#" * 100)
+        log("# 站内链接形态（用于反推每家的搜索地址与 lot 链接规律）")
+        log("#" * 100)
+        for h in healths:
+            p = h.probe or {}
+            if not p:
+                continue
+            log(f"\n[{h.id}] HTTP {p.get('http','-')} · {p.get('bytes','-')}B · "
+                f"jade={p.get('jade_mentions','-')} · {','.join(p.get('flags') or []) or '-'}")
+            log(f"    {p.get('url','')}")
+            for sh, n, ex, tx in (p.get("shapes") or [])[:6]:
+                log(f"    {n:>4}×  {sh[:80]}")
+                log(f"          {ex[:100]}")
         return 0
 
     # 去重：同 URL 只留一条；同标题 + 同拍行 视为重复（聚合站与官网重复）
@@ -703,6 +848,13 @@ def main(argv):
         seen_url.add(lot.url)
         seen_key.add(key)
         uniq.append(lot)
+
+    if uniq and "--no-enrich" not in argv:
+        enrich_lots(uniq)
+        # 富化后标题变干净，重新过一遍口径（赝品词、20 世纪等这时才暴露）
+        before = len(uniq)
+        uniq = [l for l in uniq if is_target(l.title, l.query)[0]]
+        log(f"  富化后二次过滤：{before} → {len(uniq)} 条")
 
     uniq.sort(key=lambda x: (x.end_ts or "9999", x.house))
     payload = {
