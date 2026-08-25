@@ -105,3 +105,67 @@ cd ~/Desktop/Claude\ Code/China-Coin-Auction-Live
 **维护方式**：打开 `jade.html`，编辑 `<script>` 顶部数据数组 —— `AS_OF` / `AUCTIONS`（档期，`end` 字段可留空即不显示倒计时）/ `CATS`（品类图谱）/ `KW_GROUPS` / `ERAS` / `TIERS` / `PCARDS` / `CONSIGN` / `NOTES`。改完刷新浏览器即可，无需构建。
 
 **数据时点**：2026-08-25。档期以各行官网日历为准；玉器无统一评级体系，站内不列具体估价，一切以平台页面为准。
+
+---
+
+## 🔴 实时抓取：海外中国古玉在拍数据
+
+**范围**：中国大陆以外的拍卖行 / 聚合平台 · 中国古玉与翡翠 · **清代及以前**（自动排除 20 世纪、民国及以后）。
+
+### 为什么抓取跑在 GitHub Actions 上
+
+纯前端不可能跨域抓各拍行库存（CORS + 反爬），所以：
+
+```
+GitHub Actions（每 3 小时）→ scraper/core.py 抓取 27 个海外源
+        → 归一化 / 分类 / 去重 → data/lots.json + data/lots.js
+        → 回写仓库 → jade.html 读取并渲染「实时在拍」区
+```
+
+`data/lots.js` 是 `window.__JADE_DATA__ = {...}` 包裹版，双击用 `file://` 打开页面时也能读到；
+用 http 打开时页面会额外 `fetch` 一次 `lots.json` 取最新。
+
+### 抓取器结构
+
+| 文件 | 作用 |
+|------|------|
+| `scraper/sources.yml` | **唯一需要改的地方**。新增一家拍行 = 加一段配置，不动代码 |
+| `scraper/core.py` | 抓取、解析、归一化、分类、过滤、去重、产出 |
+| `.github/workflows/scrape-jade.yml` | 定时 / 手动 / push 触发 |
+
+**三级降级解析**（先成功者胜，实际命中的策略会写进健康报告）：
+
+1. `configured` — `sources.yml` 里写好的 CSS 选择器
+2. `jsonld` — 页面内嵌 schema.org JSON-LD（`Product` / `ItemList`）
+3. `links` — 按 `lot_url_pattern` 正则捞链接 + 锚文本（最保底，多数站点都能出货）
+
+另支持 `method: json` 直连 JSON API（`json:` 段写点号取值路径）。
+
+### 收录口径（`core.py` 中的正则）
+
+- **必须命中玉**：`jade / jadeite / nephrite / 玉 / 翡翠`（`hardstone` 需另有中国信号）
+- **必须有中国语境**：标题含 `chinese/qing/ming/qianlong/hongshan/…` 或检索词本身即中国向
+- **年代 ≤ 清**：`高古（新石器–汉）/ 唐宋辽金 / 元明 / 清 / 未标注` 放行；
+  命中 `20th century / republic period / art deco / 现代` 一律剔除
+- **材质分类**：翡翠（硬玉）/ 和田玉·软玉（软玉）/ 未标注
+
+### 运行方式
+
+```bash
+# 本地跑（需要能出网的环境）
+pip install -r scraper/requirements.txt
+python scraper/core.py                     # 正式抓取，产出 data/
+python scraper/core.py --probe             # 探测模式：打印各源响应特征 + 三种解析器命中数
+python scraper/core.py --only=auctionet,bonhams   # 只跑指定源
+```
+
+在 GitHub 上：Actions → 「抓取海外中国古玉拍品」→ Run workflow（可选 `probe` 模式）。
+推送 `scraper/` 下的改动也会自动触发一次。
+
+> ⚠️ **cron 只在默认分支生效** —— 每 3 小时自动刷新要等本分支合入 `main` 之后才会开始。
+> 在此之前用手动触发 / push 触发。
+
+### 页面上的「抓取源状态」
+
+页面「实时在拍」区底部有一个折叠面板，逐源列出**抓到多少 / 命中多少 / 用了哪级解析 / HTTP 状态**。
+被 Cloudflare 或 bot 墙拦住的源会显示 403，方便直接判断是选择器要改还是该源根本抓不动。
