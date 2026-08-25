@@ -1,0 +1,39 @@
+name: 部署 GitHub Pages
+
+on:
+  push:
+    branches: [main]        # 抓取器每 3 小时回写 data/ 也会走这里，页面数据随之更新
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 组装静态站（只带页面与数据，不带抓取器）
+        run: |
+          mkdir -p _site/data
+          cp index.html jade.html _site/
+          cp data/lots.js data/lots.json _site/data/ 2>/dev/null || true
+          touch _site/.nojekyll
+          echo "已打包："; find _site -type f | sed 's/^/  /'
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
