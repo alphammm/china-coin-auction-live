@@ -110,6 +110,13 @@ CURRENCY_RE = re.compile(
     r"(USD|EUR|GBP|CHF|SEK|DKK|NOK|JPY|HKD|AUD|CAD|SGD|TWD|£|\$|€|¥|kr)\s*"
     r"([\d][\d\s.,']*)", re.I)
 CUR_MAP = {"£": "GBP", "$": "USD", "€": "EUR", "¥": "JPY", "kr": "SEK"}
+# 聚合平台不给拍行所在地，用成交币种回推，比一律标"聚合"有用得多
+CUR_REGION = {
+    "GBP": "英国", "EUR": "欧陆", "SEK": "欧陆", "DKK": "欧陆", "NOK": "欧陆",
+    "CHF": "欧陆", "PLN": "欧陆", "CZK": "欧陆",
+    "USD": "美国", "CAD": "美国", "AUD": "澳新", "NZD": "澳新",
+    "HKD": "香港", "SGD": "新加坡", "JPY": "日本", "TWD": "台湾",
+}
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -497,7 +504,7 @@ def enrich_lots(lots: list, workers: int = 8, cap: int = 900):
             if not d:
                 continue
             if d.get("title") and len(d["title"]) > 8:
-                lot.title = d["title"]
+                lot.title = clean_title(d["title"])
                 lot.period = classify_period(lot.title + " " + d.get("desc", ""))
                 lot.material = classify_material(lot.title + " " + d.get("desc", ""))
             if d.get("image"):
@@ -512,6 +519,9 @@ def enrich_lots(lots: list, workers: int = 8, cap: int = 900):
                     lot.end_ts, lot.end_approx = real, False
             if d.get("house") and 2 < len(d["house"]) < 60:
                 lot.house = d["house"]
+            # 聚合站条目原本只有"聚合"，用币种把地区还原出来
+            if lot.currency:
+                lot.region = CUR_REGION.get(lot.currency, lot.region)
     log(f"  详情页回访完成：{done} 条")
 
 
@@ -585,10 +595,14 @@ FAKE_RE = re.compile(
     r"reproduction|replica)\b", re.I)
 
 
-def clean_title(t: str) -> str:
+def clean_title(t: str, limit: int = 180) -> str:
     t = re.sub(r"\s+", " ", t or "").strip()
     t = NOISE_RE.sub("", t)
     t = re.sub(r"[·|•]\s*$", "", t).strip(" .,-–—…")
+    if len(t) > limit:                       # 详情页常把整段著录塞进 og:title
+        cut = max(t.rfind("，", 60, limit), t.rfind(", ", 60, limit),
+                  t.rfind("。", 60, limit), t.rfind(". ", 60, limit))
+        t = (t[:cut] if cut > 60 else t[:limit]).rstrip(" ,.;、，。") + "…"
     return t
 
 
