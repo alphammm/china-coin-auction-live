@@ -21,9 +21,12 @@ sources:
   url: https://auctionet.com/en/search?q={q}&is_ended=0&page={page}
   queries:
   - chinese jade
-  - jadeite
-  - nephrite
-  pages: 2
+  - jade cong
+  - archaic jade
+  - nephrite china
+  - jadeite china
+  - qing jade
+  pages: 3
   browser: true
   lot_url_pattern: auctionet\.com/[a-z]{2}/\d+
 - id: hibid
@@ -34,8 +37,11 @@ sources:
   url: https://hibid.com/lots?q={q}&status=OPEN
   queries:
   - chinese jade
+  - jade carving
   - jadeite
-  pages: 2
+  - archaic jade
+  - nephrite
+  pages: 3
   browser: true
   lot_url_pattern: hibid\.com/lot/\d+
 - id: proxibid
@@ -81,8 +87,11 @@ sources:
   url: https://www.invaluable.com/search?keyword={q}&upcoming=true
   queries:
   - chinese jade
+  - jade cong
+  - archaic chinese jade
   - jadeite
-  pages: 1
+  - qianlong jade
+  pages: 3
   browser: true
   lot_url_pattern: invaluable\.com/auction-lot/
 - id: bidsquare
@@ -105,8 +114,10 @@ sources:
   url: https://www.the-saleroom.com/en-gb/search-results?searchTerm={q}
   queries:
   - chinese jade
+  - jade carving chinese
+  - archaic jade
   - jadeite
-  pages: 1
+  pages: 3
   browser: true
   lot_url_pattern: the-saleroom\.com/en-gb/auction-catalogues/.+/lot-
 - id: ibidder
@@ -117,7 +128,9 @@ sources:
   url: https://www.i-bidder.com/en-gb/search-results?searchTerm={q}
   queries:
   - chinese jade
-  pages: 1
+  - jade carving
+  - jadeite
+  pages: 2
   browser: true
   lot_url_pattern: i-bidder\.com/en-gb/auction-catalogues/.+/lot-
 - id: easylive
@@ -252,7 +265,9 @@ sources:
   url: https://www.sothebys.com/en/search?query={q}
   queries:
   - chinese jade
-  pages: 1
+  - jade carving
+  - archaic jade
+  pages: 2
   browser: true
   lot_url_pattern: sothebys\.com/en/buy/auction/
 - id: heritage

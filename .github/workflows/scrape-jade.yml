@@ -47,15 +47,17 @@ jobs:
 
       # push 默认只跑探测（76 个源，真浏览器逐个打开很慢）；
       # 提交信息里带 [scrape] 才顺带正式抓取一轮。
+      # 探测很慢（76 源 × 真浏览器），默认不跑；
+      # 需要时在提交信息里写 [probe]，或手动 dispatch 选 probe。
       - name: 探测各源响应特征
-        if: inputs.mode != 'scrape'
+        if: >-
+          inputs.mode == 'probe' ||
+          (github.event_name == 'push' && contains(github.event.head_commit.message, '[probe]'))
         continue-on-error: true
         run: python scraper/core.py --probe ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
 
       - name: 正式抓取
-        if: >-
-          inputs.mode != 'probe' &&
-          (github.event_name != 'push' || contains(github.event.head_commit.message, '[scrape]'))
+        if: inputs.mode != 'probe'
         run: python scraper/core.py ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
 
       - name: 上传探测样本
@@ -70,9 +72,7 @@ jobs:
           retention-days: 14
 
       - name: 提交数据
-        if: >-
-          inputs.mode != 'probe' &&
-          (github.event_name != 'push' || contains(github.event.head_commit.message, '[scrape]'))
+        if: inputs.mode != 'probe' 
         run: |
           git config user.name  "jade-scraper[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -36,6 +36,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sources.yml")
 DATA_DIR = os.path.join(ROOT, "data")
 
+MAX_PARSE_CHARS = 3_000_000   # Bidsquare 单页 15MB，全量 parse 会把整轮拖死
+
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
 HEADERS = {
@@ -652,7 +654,7 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
             try:
                 if use_browser:
                     r = BROWSER.get(url, src.get("wait_selector", ""),
-                                    timeout=int(src.get("timeout", 45)) * 1000)
+                                    timeout=int(src.get("timeout", 25)) * 1000)
                     if not r.text:
                         health.http.append(f"{q}|p{page}: 浏览器不可用")
                         continue
@@ -669,7 +671,7 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
                                f"{' [browser]' if use_browser else ''}")
 
             if probe_only:
-                body = r.text
+                body = r.text[:MAX_PARSE_CHARS]
                 flags = []
                 if re.search(r"cloudflare|cf-browser-verification|Just a moment", body[:6000], re.I):
                     flags.append("CLOUDFLARE")
@@ -681,6 +683,7 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
                     flags.append("JSON-LD")
                 jade_hits = len(re.findall(r"jade", body, re.I))
                 counts, examples = {}, []
+                soup = None
                 if r.status_code < 400:
                     soup = BeautifulSoup(body, "lxml")
                     for fn, nm in ((parse_configured, "configured"),
@@ -700,9 +703,9 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
                         except Exception:                        # noqa: BLE001
                             counts["json"] = -1
                 shapes = []
-                if r.status_code < 400 and "html" in ct:
+                if soup is not None:
                     try:
-                        shapes = href_shapes(BeautifulSoup(body, "lxml"), url)
+                        shapes = href_shapes(soup, url)          # 复用同一棵树，别再 parse 一遍
                     except Exception:                            # noqa: BLE001
                         shapes = []
                 health.probe = {
@@ -731,7 +734,7 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
                 except Exception as e:                           # noqa: BLE001
                     health.note = f"json parse: {type(e).__name__}"
             if not raws:
-                soup = BeautifulSoup(r.text, "lxml")
+                soup = BeautifulSoup(r.text[:MAX_PARSE_CHARS], "lxml")
                 for fn, name in ((parse_configured, "configured"),
                                  (parse_jsonld, "jsonld"),
                                  (parse_links, "links")):

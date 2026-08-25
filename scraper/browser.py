@@ -61,7 +61,7 @@ class Browser:
             print(f"  ⚠ 浏览器启动失败：{type(e).__name__}: {e}", flush=True)
             return False
 
-    def get(self, url: str, wait_selector: str = "", timeout: int = 45000,
+    def get(self, url: str, wait_selector: str = "", timeout: int = 25000,
             scroll: bool = True) -> FakeResp:
         if not self.start():
             return FakeResp(0, "", url)
@@ -77,14 +77,19 @@ class Browser:
                     pass
             else:
                 try:
-                    page.wait_for_load_state("networkidle", timeout=12000)
+                    page.wait_for_load_state("networkidle", timeout=8000)
                 except Exception:                                # noqa: BLE001
                     pass
-            if scroll:                       # 触发懒加载：滚到底再回顶
-                for frac in (0.35, 0.7, 1.0):
+            if scroll:                       # 触发懒加载
+                for frac in (0.4, 0.8):
                     page.evaluate(f"window.scrollTo(0, document.body.scrollHeight*{frac})")
-                    time.sleep(0.7)
-            html = page.content()
+                    time.sleep(0.5)
+            # 超大页面 page.content() 会很慢，先量体积再决定
+            size = page.evaluate("document.documentElement.outerHTML.length")
+            if size > 6_000_000:
+                html = page.evaluate("document.documentElement.outerHTML.slice(0, 3000000)")
+            else:
+                html = page.content()
             return FakeResp(status or 200, html, url)
         except Exception as e:                                   # noqa: BLE001
             return FakeResp(status, f"<!-- browser error: {type(e).__name__}: {e} -->", url)
