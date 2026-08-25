@@ -3,12 +3,11 @@ name: 抓取海外中国古玉拍品
 on:
   push:
     branches: ["claude/jade-auction-site-k53mke"]
-    paths:                      # 只在抓取器/工作流变更时触发，data/ 的回写不会造成自触发循环
+    paths:                      # data/ 的回写不匹配这里，不会自触发
       - "scraper/**"
       - ".github/workflows/scrape-jade.yml"
   schedule:
-    # 每 3 小时一次（GitHub 的 schedule 只在默认分支上生效，合并到 main 后才会自动跑）
-    - cron: "17 */3 * * *"
+    - cron: "17 */3 * * *"      # 只在默认分支生效，合入 main 后开始自动跑
   workflow_dispatch:
     inputs:
       mode:
@@ -31,7 +30,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -42,16 +41,21 @@ jobs:
           cache-dependency-path: scraper/requirements.txt
 
       - name: 安装依赖
-        run: pip install -r scraper/requirements.txt
+        run: |
+          pip install -r scraper/requirements.txt
+          python -m playwright install --with-deps chromium
 
-      # push 触发时没有 inputs，两步都会跑：先探测（拿诊断表），再正式抓取
+      # push 默认只跑探测（76 个源，真浏览器逐个打开很慢）；
+      # 提交信息里带 [scrape] 才顺带正式抓取一轮。
       - name: 探测各源响应特征
         if: inputs.mode != 'scrape'
         continue-on-error: true
         run: python scraper/core.py --probe ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
 
       - name: 正式抓取
-        if: inputs.mode != 'probe'
+        if: >-
+          inputs.mode != 'probe' &&
+          (github.event_name != 'push' || contains(github.event.head_commit.message, '[scrape]'))
         run: python scraper/core.py ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
 
       - name: 上传探测样本
@@ -66,7 +70,9 @@ jobs:
           retention-days: 14
 
       - name: 提交数据
-        if: inputs.mode != 'probe'
+        if: >-
+          inputs.mode != 'probe' &&
+          (github.event_name != 'push' || contains(github.event.head_commit.message, '[scrape]'))
         run: |
           git config user.name  "jade-scraper[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -28,6 +28,10 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 
+from browser import Browser
+
+BROWSER = Browser()
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sources.yml")
 DATA_DIR = os.path.join(ROOT, "data")
@@ -36,10 +40,21 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
 HEADERS = {
     "User-Agent": UA,
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-GB,en;q=0.9",
-    "Cache-Control": "no-cache",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "Accept-Encoding": "gzip, deflate",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "sec-ch-ua": '"Chromium";v="127", "Not)A;Brand";v="99"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
+    "Connection": "keep-alive",
 }
+SESSION = requests.Session()
+SESSION.headers.update(HEADERS)
 
 # ── 关键词：玉 ────────────────────────────────────────────────────────────
 JADE_RE = re.compile(
@@ -147,18 +162,17 @@ def load_sources(only: list[str] | None = None) -> list[dict]:
     return srcs
 
 
-def fetch(url: str, timeout: int = 30, extra_headers: dict | None = None):
-    h = dict(HEADERS)
-    if extra_headers:
-        h.update(extra_headers)
+def fetch(url: str, timeout: int = 30, extra_headers: dict | None = None, referer: str = ""):
+    h = dict(extra_headers or {})
+    if referer:
+        h["Referer"] = referer
     last = None
-    for attempt in range(3):
+    for attempt in range(2):                     # 失败的源很多，重试要克制，否则整轮拖到几十分钟
         try:
-            r = requests.get(url, headers=h, timeout=timeout, allow_redirects=True)
-            return r
+            return SESSION.get(url, headers=h, timeout=timeout, allow_redirects=True)
         except Exception as e:                                   # noqa: BLE001
             last = e
-            time.sleep(1.5 * (attempt + 1))
+            time.sleep(1.0 * (attempt + 1))
     raise last                                                   # type: ignore[misc]
 
 
@@ -303,6 +317,28 @@ def parse_links(soup, src, page_url):
             "price_text": "", "end": "", "house": "", "lot_no": "",
         })
     return out
+
+
+def href_shapes(soup, page_url, top=12):
+    """把页面所有链接归一成形态（数字→#、长 slug→*），统计出现次数。
+    这是反推 lot_url_pattern 最有效的证据：拍品链接必然是页面上最高频的形态之一。"""
+    from collections import Counter
+    host = re.sub(r"^https?://([^/]+).*", r"\1", page_url)
+    cnt, sample = Counter(), {}
+    for a in soup.select("a[href]"):
+        href = urljoin(page_url, a["href"])
+        if not href.startswith("http"):
+            continue
+        h = re.sub(r"^https?://", "", href).split("?")[0].split("#")[0]
+        if not h.startswith(host):
+            continue
+        shape = re.sub(r"\d+", "#", h)
+        shape = re.sub(r"/[^/]{25,}", "/*", shape)
+        cnt[shape] += 1
+        if shape not in sample:
+            txt = re.sub(r"\s+", " ", a.get_text(" ", strip=True))[:60]
+            sample[shape] = (href, txt)
+    return [(sh, n, sample[sh][0], sample[sh][1]) for sh, n in cnt.most_common(top)]
 
 
 # ── 解析策略 0：纯 JSON API ──────────────────────────────────────────────
@@ -477,18 +513,29 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
 
     for q in queries:
         for page in range(1, pages + 1):
-            url = (src["url"].replace("{q}", quote_plus(q))
-                             .replace("{q_raw}", q)
-                             .replace("{page}", str(page)))
+            tpl = src.get("probe_url") if (probe_only and src.get("probe_url")) else src["url"]
+            url = (tpl.replace("{q}", quote_plus(q))
+                      .replace("{q_raw}", q)
+                      .replace("{page}", str(page)))
+            use_browser = bool(src.get("browser"))
             try:
-                r = fetch(url, timeout=int(src.get("timeout", 30)),
-                          extra_headers=src.get("headers"))
+                if use_browser:
+                    r = BROWSER.get(url, src.get("wait_selector", ""),
+                                    timeout=int(src.get("timeout", 45)) * 1000)
+                    if not r.text:
+                        health.http.append(f"{q}|p{page}: 浏览器不可用")
+                        continue
+                else:
+                    r = fetch(url, timeout=int(src.get("timeout", 30)),
+                              extra_headers=src.get("headers"),
+                              referer=src.get("home", ""))
             except Exception as e:                               # noqa: BLE001
                 health.http.append(f"{q}|p{page}: EXC {type(e).__name__}")
                 continue
 
             ct = (r.headers.get("content-type") or "").split(";")[0]
-            health.http.append(f"{q}|p{page}: {r.status_code} {ct} {len(r.content)}B")
+            health.http.append(f"{q}|p{page}: {r.status_code} {ct} {len(r.content)}B"
+                               f"{' [browser]' if use_browser else ''}")
 
             if probe_only:
                 body = r.text
@@ -521,16 +568,25 @@ def run_source(src: dict, probe_only: bool = False) -> tuple[list[Lot], SourceHe
                             counts["json"] = len(parse_json_api(r.json(), src, url))
                         except Exception:                        # noqa: BLE001
                             counts["json"] = -1
+                shapes = []
+                if r.status_code < 400 and "html" in ct:
+                    try:
+                        shapes = href_shapes(BeautifulSoup(body, "lxml"), url)
+                    except Exception:                            # noqa: BLE001
+                        shapes = []
                 health.probe = {
                     "http": r.status_code, "ct": ct, "bytes": len(r.content),
                     "jade_mentions": jade_hits, "flags": flags,
                     "counts": counts, "examples": examples, "url": url,
+                    "shapes": shapes,
                 }
+                shp = "\n".join(f"      {n:>4}×  {sh}\n            例: {ex[:110]}\n            文: {tx}"
+                                for sh, n, ex, tx in shapes)
                 samples.append(
-                    f"\n{'='*78}\n[{src['id']}] {url}\n  HTTP {r.status_code} {ct} "
+                    f"\n{'='*90}\n[{src['id']}] {url}\n  HTTP {r.status_code} {ct} "
                     f"{len(r.content)}B  jade_mentions={jade_hits}  flags={','.join(flags) or '-'}\n"
                     f"  parsers={counts}  examples={examples}\n"
-                    f"{'-'*78}\n{body[:1400]}\n")
+                    f"  站内链接形态 TOP：\n{shp or '      （无）'}\n")
                 continue
 
             if r.status_code >= 400:
@@ -607,6 +663,8 @@ def main(argv):
         log(f"  {'✔' if health.kept else '·'} {src['id']:<16} "
             f"抓到 {health.lots:>4} 条 / 命中 {health.kept:>3} 条 "
             f"[{health.strategy or '-'}] {time.time()-t0:.1f}s  {health.http[:2]}")
+
+    BROWSER.close()
 
     if probe_only:
         os.makedirs(DATA_DIR, exist_ok=True)
