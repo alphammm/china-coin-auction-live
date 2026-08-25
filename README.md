@@ -72,3 +72,36 @@ cd ~/Desktop/Claude\ Code/China-Coin-Auction-Live
 - 后端爬虫 / 各平台 API → 真正逐秒抓取在拍 lot（需服务器）
 - Telegram / 邮件提醒：某关键词出现新 lot 时推送
 - 历史成交价数据库（参考 1024-Collection 的 localStorage 方案）
+
+---
+
+## 🧿 玉器 / 翡翠版：`jade.html`
+
+同一套架构的**中国玉器 · 翡翠拍卖聚合**页面，与古钱版并列（页头可互相切换）。
+
+| 区块 | 说明 |
+|------|------|
+| 玉器品类图谱 | 12 个可检索品类卡（玉琮/玉璧/红山玉龙/剑饰/带钩/子冈牌/乾隆御题/山子/痕都斯坦/翡翠手镯/帝王绿/羊脂白玉），点击即用该品类的英文专业术语检索 |
+| 重点档期面板 | 9 张档期卡。**只有确定日期的条目显示倒计时**（如 2026 秋季亚洲艺术周 9/10–9/18），其余标为"常规档期"并直达官方日历，避免假精确 |
+| 一键直达检索 | 8 个平台 × 37 个关键词（高古玉 / 礼器形制 / 明清宫廷 / 翡翠 / 和田玉 / 来源证书） |
+| 按年代检索 | 红山 · 良渚 · 齐家 · 商周 · 战国 · 汉 · 唐宋 · 辽金元 · 明 · 清乾隆 … 共 16 项 |
+| 收藏等级快搜 | 博物馆级 / 宫廷御制 / 高古玉 / 明清白玉 / 翡翠 A 货 / 入门通用 |
+| 平台与拍卖行 | 12 家：Invaluable、LiveAuctioneers、the-saleroom、Christie's、Sotheby's、Bonhams、Woolley & Wallis、Roseberys、Lyon & Turnbull、嘉德/保利、Freeman's\|Hindman 等 |
+| 寄拍名单 | 10 家玉器寄拍行，含负责部门、佣金说明、海外寄拍与适合度 |
+| 竞拍避坑要点 | 翡翠 A/B/C 货证书、高古玉来源、出土文物合规、佣金税费、jade 一词的软玉/硬玉陷阱、先查历史成交 |
+
+**平台搜索链接格式**
+
+| 平台 | 模板 |
+|------|------|
+| Invaluable | `invaluable.com/search?keyword={q}&upcoming=true` |
+| LiveAuctioneers | `liveauctioneers.com/search/?keyword={q}` |
+| the-saleroom | `the-saleroom.com/en-gb/search-results?searchTerm={q}` |
+| Christie's | `christies.com/en/search?keyword={q}` |
+| Sotheby's | `sothebys.com/en/search?query={q}` |
+| Bonhams | `bonhams.com/search/?q={q}` |
+| Barnebys | `barnebys.com/search?q={q}` |
+
+**维护方式**：打开 `jade.html`，编辑 `<script>` 顶部数据数组 —— `AS_OF` / `AUCTIONS`（档期，`end` 字段可留空即不显示倒计时）/ `CATS`（品类图谱）/ `KW_GROUPS` / `ERAS` / `TIERS` / `PCARDS` / `CONSIGN` / `NOTES`。改完刷新浏览器即可，无需构建。
+
+**数据时点**：2026-08-25。档期以各行官网日历为准；玉器无统一评级体系，站内不列具体估价，一切以平台页面为准。
