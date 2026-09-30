@@ -2,7 +2,12 @@ name: 部署 GitHub Pages
 
 on:
   push:
-    branches: [main]        # 抓取器每 3 小时回写 data/ 也会走这里，页面数据随之更新
+    branches: [main]
+  # 抓取器用 GITHUB_TOKEN 回写 data/ 不会触发其他工作流（GitHub 的防递归机制），
+  # 所以靠 workflow_run 在每轮抓取完成后接力部署，页面数据才跟得上。
+  workflow_run:
+    workflows: ["抓取海外中国古玉拍品"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
