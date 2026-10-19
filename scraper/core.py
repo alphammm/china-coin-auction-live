@@ -934,6 +934,10 @@ def main(argv):
                 old.get("currency", ""), old.get("est_low"), old.get("est_high"))
         if not lot.end_ts and old.get("end_ts"):
             lot.end_ts, lot.end_approx = old["end_ts"], old.get("end_approx", False)
+        # 近似截拍时间过期即作废：那只是由卡片倒计时折算的估值，
+        # 留着会让条目一直挂着「已结拍」并在排序里占前排
+        if lot.end_approx and lot.end_ts and lot.end_ts < now_iso:
+            lot.end_ts, lot.end_approx = "", False
         if old.get("house") and old["house"] != old.get("source") and len(lot.house) > 24:
             lot.house = old["house"]          # 源名往往很长，真实拍行名短
         if old.get("region") and lot.region in ("聚合", "国际"):
